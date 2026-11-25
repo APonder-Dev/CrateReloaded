@@ -1,29 +1,44 @@
 # CrateReloaded API
 
-This repository exposes the API for the bukkit project, CrateReloaded. CrateReloaded is a plugin that allows users to receive rewards.
+The public API for the CrateReloaded plugin: crates, rewards, claims, effects and events (`CrateGiveEvent`,
+`CrateRewardEvent`, `ClaimGiveEvent` and others), reached through `CrateAPI`. Licensed MIT (© 2019 Hazebyte), see
+[LICENSE](LICENSE).
 
-* [Project Repository](https://github.com/Hazebyte/CrateReloaded)
-* [Java Docs](https://hazebyte.github.io/CrateReloadedAPI/)
+- Plugin and build instructions: [../README.md](../README.md)
+- Javadoc for the original API: [hazebyte.github.io/CrateReloadedAPI](https://hazebyte.github.io/CrateReloadedAPI/)
 
-## Adding CrateReloadedAPI to your build
+## Using it in your plugin
 
-To add CrateReloadedAPI to your project, add the following to your pom.xml...
+The old Hazebyte Maven repository (`m2.hazebyte.com`) is offline, and this fork does not publish to a public
+repository yet. Install the API into your local Maven repository from this source tree:
 
+```bash
+mvn -pl api install
 ```
-<repository>
-    <id>hazebyte</id>
-    <url>https://m2.hazebyte.com/repository/maven_releases/</url>
-</repository>
 
+Then depend on it with `provided` scope; the CrateReloaded plugin supplies the classes at runtime:
 
+```xml
 <dependency>
     <groupId>com.hazebyte</groupId>
     <artifactId>CrateReloadedAPI</artifactId>
-    <version>1.0.0</version>
+    <version>2.2.1</version>
     <scope>provided</scope>
 </dependency>
 ```
 
-# Support
+Add `softdepend: [CrateReloaded]` (or `depend`) to your `plugin.yml`.
 
-Contact us at [Discord](https://discord.gg/0srgnnU1nbB8wMML)
+```java
+Crate crate = CrateAPI.getCrateRegistrar().getCrate("FoodKey");
+```
+
+## Notes for 2.4.0
+
+- The API is compiled for Java 8 bytecode, against an older Spigot API, so it works with every build family.
+  Code that runs inside the plugin is now checked against the 1.20.1 and 26.3 APIs. `ItemBuilder.hideAll` was the
+  one method that referenced a member 26.x removed. It is fixed, and `hideAll(false)` no longer hides flags.
+- Behaviour that API users may notice:
+  - with `/cr give all … offline`, `CrateGiveEvent` fires once per player, and cancelling it for one player
+    no longer skips the rest;
+  - an interrupted animation fires `ClaimGiveEvent` once, for the single prize.
