@@ -46,7 +46,8 @@ public class ClaimButton extends Button {
             if (f.contains("{lore}")) {
                 toBeLore.addAll(MoreObjects.firstNonNull(ItemUtil.getLore(item), new ArrayList<>()));
             } else {
-                String string = CustomFormat.format(f, claim.getRewards().size(), claim.getId());
+                // The timestamp (a Long) drives {date}; passing claim.getId() (a UUID) left {date} unformatted (#610).
+                String string = CustomFormat.format(f, claim.getRewards().size(), claim.getTimestamp());
                 toBeLore.add(string);
             }
         }

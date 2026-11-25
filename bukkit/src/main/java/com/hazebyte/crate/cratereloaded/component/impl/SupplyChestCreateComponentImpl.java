@@ -60,7 +60,7 @@ public class SupplyChestCreateComponentImpl implements SupplyChestCreateComponen
     private void onRewards(CrateImpl crate, Player player, Inventory inventory, List<Reward> rewards) {
         crate.runMessage(player, rewards);
         for (Reward reward : rewards) {
-            for (ItemStack item : reward.getItems()) {
+            for (ItemStack item : reward.getItems(player)) { // per-player placeholders (#586)
                 int slot = getEmptySlot(inventory);
                 if (slot >= 0) {
                     inventory.setItem(slot, item.clone());

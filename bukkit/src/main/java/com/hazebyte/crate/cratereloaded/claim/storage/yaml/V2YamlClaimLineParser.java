@@ -47,10 +47,12 @@ public class V2YamlClaimLineParser implements YamlClaimLineParser {
         }
 
         long timestamp = Long.parseLong(timestampString);
+        // Unparseable rewards are dropped here (all of them: remove(null) used to drop only the first, and the
+        // rest reached ClaimExecutor as null, #600). YamlClaimStorage keeps the stored data when that happens.
         List<Reward> rewards = rewardStrings.stream()
                 .map(CorePlugin.getPlugin().getCrateRegistrar()::createReward)
+                .filter(java.util.Objects::nonNull)
                 .collect(Collectors.toList());
-        rewards.remove(null);
 
         UUID claimUUID = UUID.fromString(key);
         UUID playerUUID = UUID.fromString(uuidString);

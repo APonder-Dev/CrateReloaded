@@ -78,9 +78,10 @@ public class PlayerUtil {
             total = getSlotsLeft(player) * MAX_IN_STACK;
         }
 
+        int stack = ItemCalculatorUtil.maxStackSize(item); // not 64 for unstackable items (#486)
         while (total > 0) {
             ItemStack cloned = item.clone();
-            int min = Math.min(total, MAX_IN_STACK);
+            int min = Math.min(total, stack);
             cloned.setAmount(min);
             total -= min;
 

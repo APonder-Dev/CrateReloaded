@@ -8,6 +8,7 @@ import com.hazebyte.crate.api.effect.Category;
 import com.hazebyte.crate.api.event.ClaimGiveEvent;
 import com.hazebyte.crate.api.util.Messenger;
 import com.hazebyte.crate.cratereloaded.CorePlugin;
+import com.hazebyte.crate.cratereloaded.crate.OpeningLedger;
 import com.hazebyte.crate.cratereloaded.claim.ClaimExecutor;
 import com.hazebyte.crate.cratereloaded.claim.CrateClaim;
 import com.hazebyte.crate.cratereloaded.crate.animationV2.events.AnimationCloseEvent;
@@ -75,6 +76,12 @@ public class AnimationManager {
             }
         }
 
+        // Persist the prize before the animation starts, so quitting, a disable or a crash can't lose it (#540).
+        OpeningLedger ledger = corePlugin.getOpeningLedger();
+        if (ledger != null) {
+            ledger.begin(animation.getPlayer(), Collections.singletonList(winningReward(animation)));
+        }
+
         AnimationExecution animationExecution = new AnimationExecution(animation);
         animationExecution.runTaskTimer(plugin, 0L, 1L);
         ongoingAnimations.put(playerId, animationExecution);
@@ -114,47 +121,38 @@ public class AnimationManager {
         }
     }
 
+    /**
+     * Settles the opening once. A completed animation with the player still online pays the winning reward
+     * as before. Anything else (exited early, or the player went offline, which the execution also reports
+     * as "completed") goes through {@link OpeningLedger#abort}: delivered now if the player is online and
+     * claims are off, otherwise kept as a claim. Previously an offline player got
+     * {@code executeReward} on a disconnected entity, and the prize was lost.
+     */
     public void onAnimationClose(@NonNull AnimationCloseEvent event) {
-        List<Reward> rewards =
-                CorePlugin.REWARD_MAPPER.toImplementation(event.getAnimation().getWinningRewards()).stream()
-                        .map(reward -> (Reward) reward)
-                        .collect(Collectors.toList());
+        Animation animation = event.getAnimation();
+        Player player = animation.getPlayer();
+        OpeningLedger ledger = corePlugin.getOpeningLedger();
+        boolean finishedNormally = event.getIsCompleted() && player.isOnline();
 
-        Player player = event.getAnimation().getPlayer();
-        if (corePlugin.getSettings().isHandlingClaims() && !event.getIsCompleted()) {
-            corePlugin.getClaimRegistrar().addClaim(player, rewards);
-
-            if (player.isOnline()) {
-                CrateClaim claim = CrateClaim.builder()
-                        .owner(player)
-                        .rewards(rewards)
-                        .executor(claimExecutor)
-                        .build();
-                ClaimGiveEvent claimGiveEvent = new ClaimGiveEvent(claim);
-                Bukkit.getPluginManager().callEvent(claimGiveEvent);
-
-                if (claimGiveEvent.isCancelled()) {
-                    return;
-                }
-
-                String format = CrateAPI.getMessage("core.claim_animation");
-                String message = CustomFormat.format(format, player);
-
-                Messenger.tell(event.getAnimation().getPlayer(), message);
+        if (!finishedNormally) {
+            if (ledger != null) {
+                ledger.abort(player.getUniqueId());
             }
-        } else {
-            Reward reward = CorePlugin.REWARD_MAPPER.toImplementation(
-                    event.getAnimation().getWinningRewards().get(0));
-            CorePlugin.getJavaPluginComponent()
-                    .getOpenCrateComponent()
-                    .executeCrateV2Message(
-                            event.getAnimation().getPlayer(),
-                            event.getAnimation().getCrateV2(),
-                            Collections.singletonList(reward));
-            CorePlugin.getJavaPluginComponent()
-                    .getOpenCrateComponent()
-                    .executeReward(event.getAnimation().getPlayer(), reward);
+            return;
         }
+        if (ledger != null && !ledger.complete(player.getUniqueId())) {
+            return; // already settled
+        }
+
+        Reward reward = winningReward(animation);
+        CorePlugin.getJavaPluginComponent()
+                .getOpenCrateComponent()
+                .executeCrateV2Message(player, animation.getCrateV2(), Collections.singletonList(reward));
+        CorePlugin.getJavaPluginComponent().getOpenCrateComponent().executeReward(player, reward);
+    }
+
+    private static Reward winningReward(Animation animation) {
+        return CorePlugin.REWARD_MAPPER.toImplementation(animation.getWinningRewards().get(0));
     }
 
     public void onFrameChange(@NonNull AnimationFrameChangeEvent event) {

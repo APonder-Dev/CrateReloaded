@@ -4,6 +4,7 @@ import com.hazebyte.crate.cratereloaded.component.PluginSettingComponent;
 import com.hazebyte.crate.cratereloaded.listener.crate.LeftClickListener;
 import com.hazebyte.crate.cratereloaded.listener.crate.RightClickListener;
 import com.hazebyte.crate.cratereloaded.listener.inventory.CraftListener;
+import com.hazebyte.crate.cratereloaded.listener.inventory.CrateGuiGuardListener;
 import com.hazebyte.crate.cratereloaded.listener.inventory.CreativeInventoryListener;
 import com.hazebyte.crate.cratereloaded.listener.inventory.InventoryListener;
 import com.hazebyte.crate.cratereloaded.listener.inventory.ItemFrameListener;
@@ -39,6 +40,14 @@ public class BukkitListenerModule {
     @IntoSet
     public Listener provideInventoryManagerListenerAsListener(InventoryManagerListener listener) {
         return listener;
+    }
+
+    @Provides
+    @Singleton
+    @IntoSet
+    public Listener provideCrateGuiGuardListener(
+            @NonNull com.hazebyte.crate.cratereloaded.CorePlugin plugin, @NonNull InventoryManager inventoryManager) {
+        return new CrateGuiGuardListener(plugin, inventoryManager);
     }
 
     @Provides

@@ -20,7 +20,8 @@ public class InventoryManagerListener implements Listener {
         this.inventoryHistoryManager = inventoryHistoryManager;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    // HIGH, not HIGHEST: CrateGuiGuardListener cancels every V2 GUI click at HIGHEST, after the buttons ran.
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
         inventoryManager.handleClick(event);
     }

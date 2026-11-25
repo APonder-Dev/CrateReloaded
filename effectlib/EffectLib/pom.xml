@@ -21,11 +21,11 @@
   </licenses>
 
   <dependencies>
-    <!-- Compiled against the 26.1.x server API; FireworkEffect references EntityType.FIREWORK_ROCKET. -->
+    <!-- Compiled against the build family's lowest Paper API (see effectlib/pom.xml profiles). -->
     <dependency>
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
-      <version>26.1.2.build.72-stable</version>
+      <version>${effectlib.paper.api.version}</version>
       <scope>provided</scope>
     </dependency>
     <!-- JSR-305 supplies javax.annotation.Nonnull/Nullable (used by Effect); paper-api doesn't bring

@@ -100,7 +100,8 @@ public class OpenCrateComponentImpl implements OpenCrateComponent {
         Set<RewardExecutorResult> rewardResults = new HashSet<>();
 
         /* Give items */
-        Set<GiveItemExecutorResult> itemResults = givePlayerItemsComponent.giveItems(reward.getItems(), player);
+        // getItems(player), not getItems(): {player}/{player-name} in item: rewards were never replaced (#586).
+        Set<GiveItemExecutorResult> itemResults = givePlayerItemsComponent.giveItems(reward.getItems(player), player);
         transferItemResults(itemResults, rewardResults);
 
         /* Run commands */
@@ -120,7 +121,11 @@ public class OpenCrateComponentImpl implements OpenCrateComponent {
     @Override
     public void executeRewardV2(@NonNull Player player, @NonNull RewardV2 rewardV2) {
         /* Give items */
-        givePlayerItemsComponent.giveItems(rewardV2.getItems(), player);
+        givePlayerItemsComponent.giveItems(
+                rewardV2.getItems().stream()
+                        .map(item -> com.hazebyte.crate.cratereloaded.util.format.ItemFormatter.format(item.clone(), player))
+                        .collect(Collectors.toList()),
+                player); // per-player placeholders, as for legacy rewards (#586)
 
         /* Run commands */
         CommandUtil.run(rewardV2.getCommands().stream()

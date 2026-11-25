@@ -1,5 +1,10 @@
 package com.hazebyte.crate.cratereloaded;
 
+import com.hazebyte.crate.cratereloaded.compat.BuildFamily;
+import com.hazebyte.crate.cratereloaded.util.format.CustomFormat;
+import com.hazebyte.crate.api.event.ClaimGiveEvent;
+import com.hazebyte.crate.cratereloaded.claim.CrateClaim;
+import com.hazebyte.crate.cratereloaded.crate.OpeningLedger;
 import co.aikar.commands.BukkitCommandManager;
 import com.hazebyte.crate.api.CrateAPI;
 import com.hazebyte.crate.api.CratePlugin;
@@ -98,6 +103,9 @@ public class CorePlugin extends JavaPlugin implements CratePlugin {
 
     /** Manager for handling claim-related operations */
     private ClaimManager claimManager;
+
+    /** Pays out interrupted crate animations exactly once (#540). */
+    private OpeningLedger openingLedger;
 
     /** Handler for managing block-based crates */
     private BlockCrateHandler blockCrateHandler;
@@ -262,14 +270,28 @@ public class CorePlugin extends JavaPlugin implements CratePlugin {
         // Clear world load listeners
         WorldLoadListener.clear();
 
+        // Startup may have stopped early (wrong build family, or an exception), so each step is guarded.
+        // Settle animations still running (pay out or keep their claim), then let claim writes reach disk.
+        if (openingLedger != null) {
+            openingLedger.abortAll();
+        }
+        if (claimManager != null && !claimManager.flush()) {
+            getLogger().severe("Timed out writing crate claims to disk during shutdown.");
+        }
         // Dispose effect services
-        getJavaPluginComponent().getEffectServiceComponent().dispose();
+        if (javaPluginComponent != null) {
+            javaPluginComponent.getEffectServiceComponent().dispose();
+        }
 
         // Remove all holograms
-        hologramProvider.removeAll();
+        if (hologramProvider != null) {
+            hologramProvider.removeAll();
+        }
 
         // Unregister commands
-        commandHandler.unregisterCommands();
+        if (commandHandler != null) {
+            commandHandler.unregisterCommands();
+        }
 
         // Close and remove logger handlers
         for (Handler handler : this.getLogger().getHandlers()) {
@@ -334,6 +356,9 @@ public class CorePlugin extends JavaPlugin implements CratePlugin {
         CrateAPI.setImplementation(this);
 
         Messenger.info("Spigot Version: " + getServerVersion());
+        if (!checkBuildFamily()) {
+            return;
+        }
 
         try {
             // Set up dependency injection
@@ -353,6 +378,9 @@ public class CorePlugin extends JavaPlugin implements CratePlugin {
             // Initialize claim manager
             claimManager = new ClaimManager(
                     this, javaPluginComponent.getClaimExecutor(), javaPluginComponent.getPluginSettingComponent());
+
+            // Pending-claim ledger for animated openings; must exist before any crate can open.
+            openingLedger = createOpeningLedger(claimManager);
 
             // Set up localization and metrics if not in mock mode
             if (!getServerVersion().isMockServer()) {
@@ -468,12 +496,70 @@ public class CorePlugin extends JavaPlugin implements CratePlugin {
         return claimManager;
     }
 
+    /** @return the ledger that settles interrupted crate animations, or {@code null} before enable */
+    public OpeningLedger getOpeningLedger() {
+        return openingLedger;
+    }
+
+    private OpeningLedger createOpeningLedger(ClaimManager claims) {
+        return new OpeningLedger(
+                claims,
+                (owner, rewards) -> CrateClaim.builder()
+                        .owner(owner)
+                        .rewards(rewards)
+                        .executor(javaPluginComponent.getClaimExecutor())
+                        .build(),
+                () -> settings.isHandlingClaims(),
+                Bukkit::getPlayer,
+                (player, rewards) -> rewards.forEach(reward ->
+                        javaPluginComponent.getOpenCrateComponent().executeReward(player, reward)),
+                (player, claim) -> {
+                    ClaimGiveEvent event = new ClaimGiveEvent(claim);
+                    Bukkit.getPluginManager().callEvent(event);
+                    if (!event.isCancelled()) {
+                        Messenger.tell(
+                                player, CustomFormat.format(CrateAPI.getMessage("core.claim_animation"), player));
+                    }
+                },
+                getLogger());
+    }
+
     /**
      * Gets the server version information.
      * Lazily initializes the server version if not already set.
      *
      * @return The ServerVersion instance
      */
+    /**
+     * Refuses to start when this jar belongs to another Minecraft version line (see {@link BuildFamily}),
+     * unless the server was started with {@code -Dcratereloaded.allowUnsupportedVersion=true}.
+     *
+     * @return {@code false} if the plugin disabled itself
+     */
+    private boolean checkBuildFamily() {
+        ServerVersion version = getServerVersion();
+        if (version.isMockServer()) {
+            return true;
+        }
+        BuildFamily build = BuildFamily.load();
+        BuildFamily.Verdict verdict = build.check(version);
+        String message = build.describe(version, verdict);
+        if (verdict == BuildFamily.Verdict.UNTESTED) {
+            getLogger().warning(message);
+        } else if (verdict == BuildFamily.Verdict.WRONG_ARTIFACT) {
+            if (Boolean.getBoolean(BuildFamily.ALLOW_UNSUPPORTED_PROPERTY)) {
+                getLogger().severe(message + " Starting anyway because -D"
+                        + BuildFamily.ALLOW_UNSUPPORTED_PROPERTY + "=true is set.");
+            } else {
+                getLogger().severe(message + " Disabling CrateReloaded. (Override: -D"
+                        + BuildFamily.ALLOW_UNSUPPORTED_PROPERTY + "=true)");
+                getServer().getPluginManager().disablePlugin(this);
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public ServerVersion getServerVersion() {
         if (serverVersion == null) {

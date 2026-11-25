@@ -72,6 +72,9 @@ public interface PluginSettingComponent {
 
     boolean isShulkerInteractionEnabled();
 
+    /** {@code crate.private-sounds}: crate sounds are heard only by the player opening the crate (#597). */
+    boolean isPrivateCrateSounds();
+
     boolean isPushbackInteractionEnabled();
 
     double getPushbackXModifier();

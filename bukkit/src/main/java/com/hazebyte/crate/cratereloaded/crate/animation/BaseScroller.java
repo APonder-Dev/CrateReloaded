@@ -11,6 +11,7 @@ import com.hazebyte.crate.cratereloaded.claim.CrateClaim;
 import com.hazebyte.crate.cratereloaded.component.PluginSettingComponent;
 import com.hazebyte.crate.cratereloaded.menu.Size;
 import com.hazebyte.crate.cratereloaded.util.format.CustomFormat;
+import java.util.Collections;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -59,6 +60,8 @@ public abstract class BaseScroller extends Animation {
 
     public Inventory openCrate(Player player, Location location) {
         List<Reward> rewards = getRewards(player);
+        // rewards.get(0) is what an interrupted opening has always paid out; persist it before animating.
+        beginOpening(player, Collections.singletonList(rewards.get(0)));
         AnimationHolder holder = new AnimationHolder(this, player, rewards, crate.getConstantRewards());
         Inventory inventory = Bukkit.createInventory(holder, size.getSize(), crate.getDisplayName());
 
@@ -92,11 +95,9 @@ public abstract class BaseScroller extends Animation {
 
     @Override
     public void onDisable(List<Reward> rewards, List<Reward> constantRewards, Player player) {
-        if (settings.isHandlingClaims()) {
-            handleClaims(player, rewards);
-        } else {
-            CorePlugin.getJavaPluginComponent().getOpenCrateComponent().executeReward(player, rewards.get(0));
-        }
+        // Settled by the ledger: pays the persisted prize once. Previously, with claims enabled, this stored
+        // the whole pre-generated reward list (numberOfPrizes + 1 rewards) as claims for a single key.
+        abortOpening(player);
     }
 
     private void handleClaims(Player player, List<Reward> rewards) {

@@ -22,6 +22,7 @@ import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_HOLOGR
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_HOLOGRAM_Y_MODIFIER_KEY;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_HOLOGRAM_Z_MODIFIER_KEY;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_HOTBAR_CONTROL_KEY;
+import com.hazebyte.crate.cratereloaded.util.ConfigConstants;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_ITEM_FRAME_CONTROL_KEY;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_MATCHER_LEVEL_KEY;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_MENU_INTERACTION_KEY;
@@ -202,7 +203,12 @@ public class FilePluginSettingComponentImpl implements PluginSettingComponent {
     }
 
     public String getPreviewMenuName() {
-        return retrieveAndCacheKey(CRATE_MENU_NAME_KEY, "Crate Menu", true, Function.identity());
+        // #555-class bug: the title was read from "crate.name", but config.yml documents and ships "crate.menu",
+        // so a configured title was ignored and a missing-key warning logged. Prefer the documented key; keep
+        // honouring "crate.name" for servers that worked around it.
+        String legacy = fileConfig.getString(ConfigConstants.LEGACY_CRATE_MENU_NAME_KEY);
+        String fallback = legacy == null || legacy.isEmpty() ? "Crate Menu" : legacy;
+        return retrieveAndCacheKey(CRATE_MENU_NAME_KEY, fallback, legacy == null, Function.identity());
     }
 
     public ItemStack getPreviewBackButton() {
@@ -274,11 +280,18 @@ public class FilePluginSettingComponentImpl implements PluginSettingComponent {
     }
 
     public boolean isHotbarInteractionEnabled() {
-        return retrieveAndCacheKey(CRATE_HOTBAR_CONTROL_KEY, false, true, Boolean::parseBoolean);
+        // Optional (now in the bundled config.yml); older configs lack it, so don't warn (#555).
+        return retrieveAndCacheKey(CRATE_HOTBAR_CONTROL_KEY, false, false, Boolean::parseBoolean);
     }
 
     public boolean isShulkerInteractionEnabled() {
         return retrieveAndCacheKey(CRATE_SHULKER_CONTROL_KEY, false, false, Boolean::parseBoolean);
+    }
+
+    @Override
+    public boolean isPrivateCrateSounds() {
+        // Optional, default false = previous behaviour (everyone nearby hears crate sounds).
+        return retrieveAndCacheKey(ConfigConstants.CRATE_PRIVATE_SOUNDS_KEY, false, false, Boolean::parseBoolean);
     }
 
     public boolean isPushbackInteractionEnabled() {
@@ -333,7 +346,13 @@ public class FilePluginSettingComponentImpl implements PluginSettingComponent {
             ConfigurationSection section = fileConfig.getConfigurationSection(key);
             if (section != null) {
                 for (String variable : section.getKeys(false)) {
-                    map.put(variable, section.getString(variable));
+                    String value = section.getString(variable);
+                    map.put(variable, value);
+                    // The docs use '{name}' as the key; a key written without braces (name: value) used to match
+                    // only the bare word, so {name} in crate.yml stayed blank-looking (#611). Accept both forms.
+                    if (!variable.startsWith("{")) {
+                        map.putIfAbsent("{" + variable + "}", value);
+                    }
                 }
                 settings.put(key, map);
             }

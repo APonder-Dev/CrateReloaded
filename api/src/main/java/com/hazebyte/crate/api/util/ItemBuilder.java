@@ -173,12 +173,21 @@ public class ItemBuilder {
     return this;
   }
 
+  /**
+   * Adds every {@link ItemFlag} the running server knows ({@code hide:true} in item strings).
+   *
+   * <p>This used to name {@code ItemFlag.HIDE_POTION_EFFECTS}, which no longer exists on 26.x. Since this
+   * module compiles against an old API, the build didn't catch it, and any item with {@code hide:true} threw
+   * {@code NoSuchFieldError} at runtime. It also ignored {@code hide}, so {@code hide:false} hid everything.
+   *
+   * @param hide whether to hide; {@code false} leaves the item unchanged
+   * @return this builder
+   */
   public ItemBuilder hideAll(boolean hide) {
-    return flag(ItemFlag.HIDE_ENCHANTS)
-        .flag(ItemFlag.HIDE_ATTRIBUTES)
-        .flag(ItemFlag.HIDE_UNBREAKABLE)
-        .flag(ItemFlag.HIDE_POTION_EFFECTS)
-        .flag(ItemFlag.HIDE_DESTROYS);
+    if (!hide) {
+      return this;
+    }
+    return flags(ItemFlag.values());
   }
 
   public Integer getCustomModelData() {

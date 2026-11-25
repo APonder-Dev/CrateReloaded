@@ -7,6 +7,7 @@ import com.hazebyte.crate.api.effect.Category;
 import com.hazebyte.crate.api.exception.AnimationException;
 import com.hazebyte.crate.cratereloaded.CorePlugin;
 import com.hazebyte.crate.cratereloaded.component.PluginSettingComponent;
+import com.hazebyte.crate.cratereloaded.crate.OpeningLedger;
 import com.hazebyte.crate.cratereloaded.menu.Size;
 import com.hazebyte.crate.cratereloaded.model.CrateImpl;
 import com.hazebyte.crate.cratereloaded.util.PlayerUtil;
@@ -131,27 +132,61 @@ public abstract class Animation {
     protected abstract Inventory openCrate(Player player, Location location);
 
     public void closeCrate(Player player, Location location, Reward reward, int time) {
+        closeCrate(player, location, Collections.singletonList(reward), time);
+    }
+
+    /**
+     * Delivers the animation's result after {@code time} ticks, unless the opening was already settled by
+     * {@link OpeningLedger#abort} (player left, plugin disabled): then the prize was already paid out or
+     * kept as a claim, and nothing is delivered here (#540).
+     */
+    public void closeCrate(Player player, Location location, List<Reward> rewards, int time) {
         final Crate crate = this.crate;
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (crate == null) {
-                    removePlayerFromOpening(player);
-                    PlayerUtil.closeInventoryLater(player, 1);
+                boolean deliver = completeOpening(player);
+                removePlayerFromOpening(player);
+                if (crate == null || !deliver || !player.isOnline()) {
+                    if (player.isOnline()) {
+                        PlayerUtil.closeInventoryLater(player, 1);
+                    }
                     return;
                 }
 
-                crate.onRewards(
-                        player,
-                        Collections.singletonList(reward),
-                        location,
-                        (e) -> crate.runEffect(location, Category.END, player));
-
-                removePlayerFromOpening(player);
+                crate.onRewards(player, rewards, location, (e) -> crate.runEffect(location, Category.END, player));
                 PlayerUtil.closeInventoryLater(player, 1);
             }
         }.runTaskLater(CorePlugin.getPlugin(), time);
+    }
+
+    /** Starts the ledger session for this opening; {@code prize} is paid if the animation can't finish. */
+    protected static void beginOpening(Player player, List<Reward> prize) {
+        OpeningLedger ledger = CorePlugin.getPlugin().getOpeningLedger();
+        if (ledger != null) {
+            ledger.begin(player, prize);
+        }
+    }
+
+    /** @return whether the normal end of the animation should deliver (false if already aborted) */
+    private static boolean completeOpening(Player player) {
+        OpeningLedger ledger = CorePlugin.getPlugin().getOpeningLedger();
+        return ledger == null || ledger.complete(player.getUniqueId());
+    }
+
+    /**
+     * Settles an interrupted opening (quit, kick, plugin disable) and stops its animation task.
+     *
+     * @param player the player
+     */
+    public static void abortOpening(Player player) {
+        CorePlugin plugin = CorePlugin.getPlugin();
+        OpeningLedger ledger = plugin == null ? null : plugin.getOpeningLedger();
+        if (ledger != null) {
+            ledger.abort(player.getUniqueId());
+        }
+        players.remove(player.getUniqueId().toString());
     }
 
     protected List<Reward> getRewards(Player player) {
@@ -205,7 +240,10 @@ public abstract class Animation {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    player.openInventory(event.getInventory());
+                    // The server closes the inventory on disconnect too; never reopen it for a player who left.
+                    if (player.isOnline() && players.contains(UUID)) {
+                        player.openInventory(event.getInventory());
+                    }
                 }
             }.runTaskLater(CorePlugin.getPlugin(), delay);
         }
@@ -222,7 +260,8 @@ public abstract class Animation {
     }
 
     public void onReward(Player player, Location location, List<Reward> rewards) {
-        rewards.forEach(reward -> onReward(player, location, reward));
+        // One delivery for the whole list: the ledger session can only be completed once.
+        closeCrate(player, location, rewards, 50);
     }
 
     public abstract AnimationTask task(Inventory inventory, Player player, List<Reward> rewards, Location location);

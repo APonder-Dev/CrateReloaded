@@ -45,7 +45,12 @@ public class ItemCalculatorTest extends BukkitTest {
                 Arguments.of(new ItemBuilder(Material.STONE, 128).asItemStack(), 2),
                 Arguments.of(new ItemBuilder(Material.STONE, 64 * 20).asItemStack(), 20),
                 Arguments.of(new ItemBuilder(Material.CAKE, 1).asItemStack(), 1),
-                Arguments.of(new ItemBuilder(Material.CAKE, 64).asItemStack(), 1));
+                // #486: cake, totems and armour do not stack; ender pearls stack to 16.
+                // (The old expectation of 1 slot for 64 cakes encoded the bug.)
+                Arguments.of(new ItemBuilder(Material.CAKE, 64).asItemStack(), 64),
+                Arguments.of(new ItemBuilder(Material.TOTEM_OF_UNDYING, 5).asItemStack(), 5),
+                Arguments.of(new ItemBuilder(Material.DIAMOND_CHESTPLATE, 2).asItemStack(), 2),
+                Arguments.of(new ItemBuilder(Material.ENDER_PEARL, 20).asItemStack(), 2));
     }
 
     @ParameterizedTest
@@ -91,5 +96,50 @@ public class ItemCalculatorTest extends BukkitTest {
                 //        Arguments.of(ItemStackMockData.ONE_INVENTORY_OF_MINECART,
                 // InventoryMockData.FULL_MINECART_INVENTORY, server.addPlayer())
                 );
+    }
+
+    @org.junit.jupiter.api.Test
+    public void unstackableReward_isGivenOnePerSlot() {
+        // #486: 5 totems used to land in one slot as a stack of 5.
+        PlayerMock player = server.addPlayer();
+        Optional<ItemStack> leftover =
+                ItemCalculatorUtil.putItemsIntoInventory(player, new ItemStack(Material.TOTEM_OF_UNDYING, 5));
+        Assertions.assertFalse(leftover.isPresent());
+        int totems = 0;
+        int slots = 0;
+        for (ItemStack content : player.getInventory().getStorageContents()) {
+            if (content != null && content.getType() == Material.TOTEM_OF_UNDYING) {
+                Assertions.assertEquals(1, content.getAmount(), "a totem slot must hold exactly one totem");
+                totems += content.getAmount();
+                slots++;
+            }
+        }
+        Assertions.assertEquals(5, totems);
+        Assertions.assertEquals(5, slots);
+    }
+
+    @org.junit.jupiter.api.Test
+    public void unstackableReward_leftoverIsReturnedWhenSlotsRunOut() {
+        PlayerMock player = server.addPlayer();
+        ItemStack[] storage = player.getInventory().getStorageContents();
+        for (int i = 2; i < storage.length; i++) {
+            player.getInventory().setItem(i, new ItemStack(Material.STONE, 64));
+        }
+        Optional<ItemStack> leftover =
+                ItemCalculatorUtil.putItemsIntoInventory(player, new ItemStack(Material.TOTEM_OF_UNDYING, 5));
+        Assertions.assertTrue(leftover.isPresent());
+        Assertions.assertEquals(3, leftover.get().getAmount(), "2 free slots hold 2 totems; 3 are left over");
+    }
+
+    @org.junit.jupiter.api.Test
+    public void split_respectsMaxStackSize() {
+        java.util.List<ItemStack> pearls = ItemCalculatorUtil.split(new ItemStack(Material.ENDER_PEARL, 20));
+        Assertions.assertEquals(2, pearls.size());
+        Assertions.assertEquals(16, pearls.get(0).getAmount());
+        Assertions.assertEquals(4, pearls.get(1).getAmount());
+
+        java.util.List<ItemStack> totems = ItemCalculatorUtil.split(new ItemStack(Material.TOTEM_OF_UNDYING, 3));
+        Assertions.assertEquals(3, totems.size());
+        totems.forEach(t -> Assertions.assertEquals(1, t.getAmount()));
     }
 }

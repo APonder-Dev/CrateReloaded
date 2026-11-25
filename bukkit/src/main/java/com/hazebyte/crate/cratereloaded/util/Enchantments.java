@@ -1,9 +1,9 @@
 package com.hazebyte.crate.cratereloaded.util;
 
-import com.hazebyte.crate.cratereloaded.CorePlugin;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 
 public class Enchantments {
@@ -13,72 +13,74 @@ public class Enchantments {
     static {
         for (Enchantment e : Enchantment.values()) enchantSB.add(e.getName());
 
-        put("environmental_protection", Enchantment.PROTECTION);
-        put("protection", Enchantment.PROTECTION);
-        put("fire_protection", Enchantment.FIRE_PROTECTION);
-        put("fall_protection", Enchantment.FEATHER_FALLING);
-        put("explosion_protection", Enchantment.BLAST_PROTECTION);
-        put("projectile_protection", Enchantment.PROJECTILE_PROTECTION);
-        put("oxygen", Enchantment.RESPIRATION);
-        put("water_worker", Enchantment.AQUA_AFFINITY);
-        put("thorns", Enchantment.THORNS);
-        put("depth_strider", Enchantment.DEPTH_STRIDER);
-        put("frost_walker", "FROST_WALKER");
-        put("binding_curse", "BINDING_CURSE");
-        put("sharpness", Enchantment.SHARPNESS);
-        put("smite", Enchantment.SMITE);
-        put("bane_of_arthropods", Enchantment.BANE_OF_ARTHROPODS);
-        put("fire_aspect", Enchantment.FIRE_ASPECT);
-        put("looting", Enchantment.LOOTING);
-        put("sweeping_edge", "SWEEPING_EDGE");
-        put("efficiency", Enchantment.EFFICIENCY);
-        put("silk_touch", Enchantment.SILK_TOUCH);
-        put("unbreaking", Enchantment.UNBREAKING);
-        put("fortune", Enchantment.FORTUNE);
-        put("power", Enchantment.POWER);
-        put("punch", Enchantment.PUNCH);
-        put("flame", Enchantment.FLAME);
-        put("infinity", Enchantment.INFINITY);
-        put("luck", Enchantment.LUCK_OF_THE_SEA);
-        put("lure", Enchantment.LURE);
-        put("mending", "MENDING");
-        put("vanishing_curse", "VANISHING_CURSE");
+        put("environmental_protection", "protection");
+        put("protection", "protection");
+        put("fire_protection", "fire_protection");
+        put("fall_protection", "feather_falling");
+        put("explosion_protection", "blast_protection");
+        put("projectile_protection", "projectile_protection");
+        put("oxygen", "respiration");
+        put("water_worker", "aqua_affinity");
+        put("thorns", "thorns");
+        put("depth_strider", "depth_strider");
+        put("frost_walker", "frost_walker");
+        put("binding_curse", "binding_curse");
+        put("sharpness", "sharpness");
+        put("smite", "smite");
+        put("bane_of_arthropods", "bane_of_arthropods");
+        put("fire_aspect", "fire_aspect");
+        put("looting", "looting");
+        put("sweeping_edge", "sweeping_edge", "sweeping"); // key was "sweeping" before 1.20.5
+        put("efficiency", "efficiency");
+        put("silk_touch", "silk_touch");
+        put("unbreaking", "unbreaking");
+        put("fortune", "fortune");
+        put("power", "power");
+        put("punch", "punch");
+        put("flame", "flame");
+        put("infinity", "infinity");
+        put("luck", "luck_of_the_sea");
+        put("lure", "lure");
+        put("mending", "mending");
+        put("vanishing_curse", "vanishing_curse");
 
-        put("channeling", "CHANNELING");
-        put("impaling", "IMPALING");
-        put("multishot", "MULTSHOT");
-        put("piercing", "PIERCING");
-        put("quick_charge", "QUICK_CHARGE");
+        put("channeling", "channeling");
+        put("impaling", "impaling");
+        put("multishot", "multishot"); // was misspelt "MULTSHOT", so it never resolved
+        put("piercing", "piercing");
+        put("quick_charge", "quick_charge");
 
         // Pre-1.20.5 constant names Minecraft renamed; kept so configs written before the rename resolve.
-        put("durability", Enchantment.UNBREAKING);
-        put("dig_speed", Enchantment.EFFICIENCY);
-        put("damage_all", Enchantment.SHARPNESS);
-        put("damage_undead", Enchantment.SMITE);
-        put("damage_arthropods", Enchantment.BANE_OF_ARTHROPODS);
-        put("loot_bonus_blocks", Enchantment.FORTUNE);
-        put("loot_bonus_mobs", Enchantment.LOOTING);
-        put("arrow_damage", Enchantment.POWER);
-        put("arrow_knockback", Enchantment.PUNCH);
-        put("arrow_fire", Enchantment.FLAME);
-        put("arrow_infinite", Enchantment.INFINITY);
-        put("protection_environmental", Enchantment.PROTECTION);
-        put("protection_fire", Enchantment.FIRE_PROTECTION);
-        put("protection_fall", Enchantment.FEATHER_FALLING);
-        put("protection_explosions", Enchantment.BLAST_PROTECTION);
-        put("protection_projectile", Enchantment.PROJECTILE_PROTECTION);
+        put("durability", "unbreaking");
+        put("dig_speed", "efficiency");
+        put("damage_all", "sharpness");
+        put("damage_undead", "smite");
+        put("damage_arthropods", "bane_of_arthropods");
+        put("loot_bonus_blocks", "fortune");
+        put("loot_bonus_mobs", "looting");
+        put("arrow_damage", "power");
+        put("arrow_knockback", "punch");
+        put("arrow_fire", "flame");
+        put("arrow_infinite", "infinity");
+        put("protection_environmental", "protection");
+        put("protection_fire", "fire_protection");
+        put("protection_fall", "feather_falling");
+        put("protection_explosions", "blast_protection");
+        put("protection_projectile", "projectile_protection");
     }
 
-    private static void put(String name, Enchantment enchant) {
-        ENCHANTS.put(name, enchant);
-    }
-
-    private static void put(String name, String enchant) {
-        Enchantment enchantment = Enchantment.getByName(enchant);
-        if (enchantment != null) {
-            ENCHANTS.put(name, enchantment);
-        } else {
-            CorePlugin.getPlugin().getLogger().finer(enchant + " was not found.");
+    /**
+     * Maps a config alias to the first enchantment found among the given {@code minecraft:} keys. Keys are
+     * stable across versions, unlike the Bukkit constant names (renamed in 1.20.5), so the same lookup works
+     * on every build family. Enchantments this server does not have are skipped.
+     */
+    private static void put(String name, String... keys) {
+        for (String key : keys) {
+            Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(key));
+            if (enchantment != null) {
+                ENCHANTS.put(name, enchantment);
+                return;
+            }
         }
     }
 

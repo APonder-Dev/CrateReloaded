@@ -2,7 +2,9 @@ package com.hazebyte.crate.cratereloaded.provider.effect.slikey;
 
 import com.hazebyte.crate.cratereloaded.provider.effect.EffectWrapper;
 import de.slikey.effectlib.Effect;
+import com.hazebyte.crate.cratereloaded.CorePlugin;
 import de.slikey.effectlib.EffectType;
+import de.slikey.effectlib.effect.SoundEffect;
 import java.util.Objects;
 import java.util.Optional;
 import org.bukkit.Location;
@@ -50,6 +52,16 @@ public class SlikeyEffect implements EffectWrapper<Effect> {
     @Override
     public void setTargetPlayer(Player player) {
         effect.setTargetEntity(player);
+        // setTargetEntity only makes the effect follow the player; it never limited who receives it, so the
+        // "play only to the opener" branch in SoundEffect could not run and everyone nearby heard every crate
+        // (#597). With crate.private-sounds on, sound effects go to the opener alone. Particles are unchanged.
+        if (effect instanceof SoundEffect) {
+            CorePlugin plugin = CorePlugin.getPlugin();
+            boolean privateSounds = plugin != null
+                    && plugin.getSettings() != null
+                    && plugin.getSettings().isPrivateCrateSounds();
+            effect.setTargetPlayer(privateSounds ? player : null);
+        }
     }
 
     @Override

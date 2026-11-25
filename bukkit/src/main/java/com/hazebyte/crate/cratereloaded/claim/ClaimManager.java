@@ -4,7 +4,7 @@ import com.hazebyte.crate.api.claim.Claim;
 import com.hazebyte.crate.api.claim.ClaimRegistrar;
 import com.hazebyte.crate.api.crate.Crate;
 import com.hazebyte.crate.api.crate.reward.Reward;
-import com.hazebyte.crate.cratereloaded.claim.storage.ClaimStorage;
+import com.hazebyte.crate.cratereloaded.crate.OpeningLedger;
 import com.hazebyte.crate.cratereloaded.claim.storage.yaml.YamlClaimStorage;
 import com.hazebyte.crate.cratereloaded.component.PluginSettingComponent;
 import com.hazebyte.crate.cratereloaded.menu.Size;
@@ -23,10 +23,10 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class ClaimManager implements ClaimRegistrar {
+public class ClaimManager implements ClaimRegistrar, OpeningLedger.PendingClaimStore {
 
     private final JavaPlugin plugin;
-    private final ClaimStorage claimStorage;
+    private final YamlClaimStorage claimStorage;
     private final ClaimExecutor claimExecutor;
     private final PluginSettingComponent settings;
 
@@ -64,6 +64,25 @@ public class ClaimManager implements ClaimRegistrar {
     @Override
     public CompletableFuture<Void> removeClaim(@NonNull Claim claim) {
         return claimStorage.deleteClaim(claim);
+    }
+
+    /**
+     * Waits for queued claim writes to reach disk and stops the storage thread. Call once, on disable.
+     *
+     * @return whether everything was written in time
+     */
+    public boolean flush() {
+        return claimStorage.close(10);
+    }
+
+    @Override
+    public CompletableFuture<?> save(Claim claim) {
+        return addClaim(claim);
+    }
+
+    @Override
+    public CompletableFuture<?> delete(Claim claim) {
+        return removeClaim(claim);
     }
 
     @Override

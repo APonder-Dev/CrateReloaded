@@ -60,9 +60,19 @@ public class GiveCrateComponentImpl implements GiveCrateComponent {
             @NonNull Crate crate,
             @NonNull Integer amount,
             @NonNull boolean sendToClaim) {
+        giveCrate(sender, offlinePlayer, crate, amount, sendToClaim, false);
+    }
+
+    private void giveCrate(
+            @NonNull CommandSender sender,
+            @NonNull OfflinePlayer offlinePlayer,
+            @NonNull Crate crate,
+            @NonNull Integer amount,
+            boolean sendToClaim,
+            boolean giveAll) {
         Player player = offlinePlayer.getPlayer();
 
-        CrateGiveEvent event = new CrateGiveEvent(sender, offlinePlayer, crate, amount, false);
+        CrateGiveEvent event = new CrateGiveEvent(sender, offlinePlayer, crate, amount, giveAll);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) return;
 
@@ -167,10 +177,26 @@ public class GiveCrateComponentImpl implements GiveCrateComponent {
 
     @Override
     public void giveCrateToAllOnlinePlayers(@NonNull CommandSender sender, @NonNull Crate crate, Integer amount) {
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        giveCrateToAllOnlinePlayers(sender, crate, amount, false);
+    }
+
+    /**
+     * {@code /cr give all <crate> [amount] [online|offline]}. With {@code offline} (sendToClaim), every online
+     * player gets the crate in {@code /cr claim}, exactly like {@code /cr give to <player> <crate> n offline}
+     * (#445, #524: the {@code offline} argument was ignored and the keys went straight to inventories).
+     */
+    @Override
+    public void giveCrateToAllOnlinePlayers(
+            @NonNull CommandSender sender, @NonNull Crate crate, Integer amount, boolean sendToClaim) {
+        for (Player player : new java.util.ArrayList<>(Bukkit.getOnlinePlayers())) {
+            if (sendToClaim) {
+                giveCrate(sender, player, crate, amount, true, true);
+                continue;
+            }
             CrateGiveEvent event = new CrateGiveEvent(sender, player, crate, amount, true);
             Bukkit.getPluginManager().callEvent(event);
-            if (event.isCancelled()) return;
+            // A listener cancelling the give for one player used to `return`, skipping everyone after them.
+            if (event.isCancelled()) continue;
 
             plugin.getCrateRegistrar().giveCrate(crate, player, amount);
         }

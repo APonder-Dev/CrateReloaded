@@ -64,6 +64,14 @@ public class InventoryManager {
         }
     }
 
+    /**
+     * @param inventory an inventory
+     * @return whether it is a V2 GUI opened by this manager
+     */
+    public boolean isManaged(Inventory inventory) {
+        return inventoryMap.containsKey(inventory);
+    }
+
     protected void handleClick(InventoryClickEvent event) {
         if (inventoryMap.containsKey(event.getInventory())) {
             inventoryMap.get(event.getInventory()).onClick(event);

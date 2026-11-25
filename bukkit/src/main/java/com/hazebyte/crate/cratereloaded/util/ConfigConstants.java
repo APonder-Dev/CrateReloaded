@@ -1,6 +1,6 @@
 package com.hazebyte.crate.cratereloaded.util;
 
-import com.hazebyte.base.util.ItemBuilder;
+import com.hazebyte.crate.api.util.ItemBuilder;
 import com.hazebyte.crate.api.crate.Crate;
 import com.hazebyte.crate.api.effect.Category;
 import com.hazebyte.util.Mat;
@@ -42,11 +42,16 @@ public class ConfigConstants {
     public static final String CRATE_ANIMATION_CSGO_TOP_ITEM_KEY = "crate.buttons.csgo-top";
     public static final String CRATE_ANIMATION_CSGO_BOTTOM_ITEM_KEY = "crate.buttons.csgo-bot";
     public static final String CRATE_MENU_INTERACTION_KEY = "crate.buttons.enabled";
-    public static final String CRATE_MENU_NAME_KEY = "crate.name";
+    /** Preview menu title. config.yml has always documented it as {@code crate.menu}; the code read {@code crate.name}. */
+    public static final String CRATE_MENU_NAME_KEY = "crate.menu";
+
+    /** Undocumented key the code used to read for the preview title; still honoured if set. */
+    public static final String LEGACY_CRATE_MENU_NAME_KEY = "crate.name";
     public static final String CRATE_CONFIRMATION_MENU_NAME_KEY = "crate.confirmation-menu";
     public static final String CRATE_CRAFT_CONTROL_KEY = "crate.craft";
     public static final String CRATE_ITEM_FRAME_CONTROL_KEY = "crate.item-frame";
     public static final String CRATE_HOTBAR_CONTROL_KEY = "crate.hotbar";
+    public static final String CRATE_PRIVATE_SOUNDS_KEY = "crate.private-sounds";
     public static final String CRATE_SHULKER_CONTROL_KEY = "crate.shulker";
     public static final String CRATE_PUSHBACK_ENABLED_KEY = "crate.pushback.enabled";
     public static final String CRATE_PUSHBACK_X_MODIFIER_KEY = "crate.pushback.x";

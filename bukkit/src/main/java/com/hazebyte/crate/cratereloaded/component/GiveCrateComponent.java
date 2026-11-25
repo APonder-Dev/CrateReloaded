@@ -21,4 +21,11 @@ public interface GiveCrateComponent {
             @NonNull Player player, @NonNull Crate crate, @NonNull int amount);
 
     void giveCrateToAllOnlinePlayers(@NonNull CommandSender sender, @NonNull Crate crate, Integer amount);
+
+    /**
+     * @param sendToClaim {@code true} to put the crates in each player's {@code /cr claim} instead of the
+     *     inventory
+     */
+    void giveCrateToAllOnlinePlayers(
+            @NonNull CommandSender sender, @NonNull Crate crate, Integer amount, boolean sendToClaim);
 }

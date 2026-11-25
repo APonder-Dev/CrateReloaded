@@ -37,6 +37,10 @@ class EnchantmentsTest extends BukkitTest {
                 Arguments.of("PROTECTION_PROJECTILE", Enchantment.PROJECTILE_PROTECTION),
                 // case-insensitive, and a modern name still resolves
                 Arguments.of("durability", Enchantment.UNBREAKING),
-                Arguments.of("SHARPNESS", Enchantment.SHARPNESS));
+                Arguments.of("SHARPNESS", Enchantment.SHARPNESS),
+                // aliases that resolve by minecraft: key (multishot was misspelt and never resolved)
+                Arguments.of("multishot", Enchantment.MULTISHOT),
+                Arguments.of("sweeping_edge", Enchantment.SWEEPING_EDGE),
+                Arguments.of("fall_protection", Enchantment.FEATHER_FALLING));
     }
 }

@@ -24,16 +24,17 @@ public class AnimationMenuListener implements Listener {
         return INSTANCE;
     }
 
+    /**
+     * Settles a player's interrupted animation through the {@code OpeningLedger}. This no longer depends
+     * on the animation inventory still being open: on a disconnect the server closes it before
+     * {@link PlayerQuitEvent} fires, which is how rewards used to be lost (#540).
+     */
     public static void handleAnimationRewards(Player player, boolean closeInventory) {
-        if (player.getOpenInventory() != null) {
+        Animation.abortOpening(player);
+        if (closeInventory && player.getOpenInventory() != null) {
             Inventory inventory = player.getOpenInventory().getTopInventory();
             if (inventory.getHolder() instanceof AnimationHolder) {
-                AnimationHolder holder = (AnimationHolder) inventory.getHolder();
-                holder.getMenu().onDisable(holder.getRewards(), holder.getConstantRewards(), player);
-                holder.getMenu().removePlayerFromOpening(player);
-                if (closeInventory) {
-                    player.closeInventory();
-                }
+                player.closeInventory();
             }
         }
     }

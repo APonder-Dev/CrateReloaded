@@ -6,7 +6,6 @@ import de.slikey.effectlib.EffectType;
 import de.slikey.effectlib.util.RandomUtils;
 import org.bukkit.Color;
 import org.bukkit.Location;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Vector;
@@ -47,7 +46,7 @@ public class FireworkEffect extends Effect {
         for (int i = 0; i < explosions; i++) {
             Vector v = RandomUtils.getRandomVector().multiply(radius);
             location.add(v);
-            final Firework fw = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK_ROCKET);
+            final Firework fw = location.getWorld().spawn(location, Firework.class);
             FireworkMeta meta = fw.getFireworkMeta();
             meta.setPower(power);
             meta.addEffect(firework);

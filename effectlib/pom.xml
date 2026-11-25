@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <!-- In-tree fork of elBukkit/EffectLib (MIT): the EffectLib core plus a Compatibility layer of
-       version-specific particle backends. The core compiles against the 26.x API, isolated from the
+       version-specific particle backends. The core compiles against the build family's Paper API, isolated from the
        reactor's other provided deps. See LICENSE for attribution. -->
   <groupId>com.elmakers.mine.bukkit</groupId>
   <artifactId>EffectLib-parent</artifactId>
@@ -15,9 +15,32 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>25</maven.compiler.source>
-    <maven.compiler.target>25</maven.compiler.target>
+    <!-- The core follows the CrateReloaded build family (same profile ids as the root POM: mc26 / mc121 /
+         mc120). The Compatibility backends always target Java 17 and are selected at runtime. -->
+    <maven.compiler.release>25</maven.compiler.release>
+    <effectlib.paper.api.version>26.3.build.249-stable</effectlib.paper.api.version>
   </properties>
+
+  <profiles>
+    <profile>
+      <id>mc26</id>
+      <activation><activeByDefault>true</activeByDefault></activation>
+    </profile>
+    <profile>
+      <id>mc121</id>
+      <properties>
+        <maven.compiler.release>21</maven.compiler.release>
+        <effectlib.paper.api.version>1.21.1-R0.1-SNAPSHOT</effectlib.paper.api.version>
+      </properties>
+    </profile>
+    <profile>
+      <id>mc120</id>
+      <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <effectlib.paper.api.version>1.20.1-R0.1-SNAPSHOT</effectlib.paper.api.version>
+      </properties>
+    </profile>
+  </profiles>
 
   <modules>
     <module>Compatibility</module>

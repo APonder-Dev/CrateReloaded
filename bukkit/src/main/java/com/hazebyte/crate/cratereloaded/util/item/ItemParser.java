@@ -1,5 +1,6 @@
 package com.hazebyte.crate.cratereloaded.util.item;
 
+import com.hazebyte.crate.cratereloaded.compat.PotionCompat;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.PLUGIN_CUSTOM_MODEL_DATA_FEATURE_NAME;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.PLUGIN_NBT_FEATURE_NAME;
 
@@ -61,6 +62,7 @@ public class ItemParser {
             return null;
         }
         str = CustomFormat.format(str);
+        str = stripAppendedNbt(str);
 
         // Split the string into it's corresponding parts
         // ["dirt", "name:My_Name"]
@@ -101,6 +103,34 @@ public class ItemParser {
         resetPotionData();
 
         return item;
+    }
+
+    /**
+     * Removes the item NBT that 2.3.8 appended to serialised items, e.g.
+     * {@code TRIPWIRE_HOOK 2 name:&bKey hide:true {Enchantments:[...],display:{Lore:['{"text":"Kan brukes"...}']}}}.
+     *
+     * <p>That NBT contains spaces, so splitting the item string on spaces cut it into fragments, which were then
+     * rejected as bad meta (e.g. "Enchantment is invalid: [{Enchantments]"). The whole reward came out null, and
+     * claiming it threw (#600). The NBT only repeats what the plain tokens before it already say (name, lore,
+     * enchantments, flags), so dropping it loses nothing. Item strings use {@code _} for spaces, so " {" up to the
+     * last "}" with a space inside can only be this appended NBT. A single-token {@code {...}} NBT meta (no
+     * spaces) is left alone for {@link #parseNbt}.
+     *
+     * @param str an item string
+     * @return the string without the appended NBT block
+     */
+    public static String stripAppendedNbt(String str) {
+        int open = str.indexOf(" {");
+        int close = str.lastIndexOf('}');
+        if (open < 0 || close <= open) {
+            return str;
+        }
+        String block = str.substring(open + 1, close + 1);
+        if (!block.contains(" ")) {
+            return str;
+        }
+        Messenger.info(String.format("Ignoring item NBT written by an older version: [%s]", block));
+        return (str.substring(0, open) + str.substring(close + 1)).trim();
     }
 
     public static boolean isNbtPattern(String meta) {
@@ -260,7 +290,7 @@ public class ItemParser {
             } else if (potionType != null) {
                 // A base potion type (e.g. type:SWIFTNESS) without a custom effect.
                 PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-                potionMeta.setBasePotionType(potionType);
+                PotionCompat.setBase(potionMeta, potionType, false, false);
                 item.setItemMeta(potionMeta);
             }
         }

@@ -191,8 +191,8 @@ public class CrateHandler implements CrateRegistrar {
         if (settings.getCrateComparisonLevel() < 2) {
             for (Crate crate : crates) {
                 if (crate.is(item)) {
-                    String key = ItemUtil.toKeyString(item);
-                    itemCache.put(key, crate);
+                    itemCache.put(itemKey, crate);
+                    return crate; // used to fall through and return null on the first lookup of a variant
                 }
             }
         }
@@ -267,8 +267,17 @@ public class CrateHandler implements CrateRegistrar {
     @Override
     public void remove(Crate crate) {
         crates.remove(crate);
-        // The item may be changed if it's via an API.
-        materialCache.remove(crate.getItem().getType());
+        // Rebuild instead of removing the material: other crates may share it (e.g. three NETHER_STAR keys),
+        // and removing it made every remaining crate of that material unrecognisable.
+        materialCache.clear();
+        for (Crate other : crates) {
+            materialCache.add(other.getItem().getType());
+        }
+        for (CrateV2 other : cratesV2.values()) {
+            if (!other.getCrateName().equals(crate.getCrateName())) {
+                materialCache.add(other.getItem().getType());
+            }
+        }
         nameCache.remove(crate.getCrateName());
         itemCache.remove(ItemUtil.toKeyString(crate.getItem()));
         // Also remove from V2 storage

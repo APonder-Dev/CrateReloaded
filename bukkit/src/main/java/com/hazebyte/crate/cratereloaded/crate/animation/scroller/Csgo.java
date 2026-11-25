@@ -38,8 +38,16 @@ public class Csgo extends BaseScroller {
         return new CsgoTask(task);
     }
 
+    /** First and last slot of the scrolling row. */
+    protected static final int FIRST_SLOT = 10;
+
+    protected static final int LAST_SLOT = 16;
+
     protected void initialize(Inventory inventory, Player player) {
-        List<Reward> rewards = getRewards(player, 6);
+        // Fill the whole visible row (slots 10-16). Only 6 rewards were placed, leaving slot 16 as a glass pane:
+        // CSGO showed it on the first frame and CSGO_REVERSE, which scrolls from 16 leftwards, carried it
+        // across the row (#536).
+        List<Reward> rewards = getRewards(player, LAST_SLOT - FIRST_SLOT + 1);
         for (int i = 0; i < rewards.size(); i++) {
             inventory.setItem(10 + i, rewards.get(i).getDisplayItem());
         }

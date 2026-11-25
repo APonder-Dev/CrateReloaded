@@ -33,11 +33,6 @@
     <!-- GUI/menu framework; binary-only, mirrored under bukkit/repo -->
     <dependency>
       <groupId>com.hazebyte</groupId>
-      <artifactId>base</artifactId>
-      <version>0.0.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.hazebyte</groupId>
       <artifactId>utils</artifactId>
       <version>1.0.0</version>
     </dependency>
@@ -128,42 +123,37 @@
       <artifactId>dagger</artifactId>
       <version>2.60</version>
     </dependency>
-    <dependency>
-      <groupId>de.tr7zw</groupId>
-      <artifactId>item-nbt-api</artifactId>
-      <version>2.15.7</version>
-    </dependency>
 
     <!--Test-->
     <dependency>
       <groupId>org.mockbukkit.mockbukkit</groupId>
-      <artifactId>mockbukkit-v26.1.2</artifactId>
-      <version>4.113.3</version>
+      <artifactId>${mockbukkit.artifact}</artifactId>
+      <version>${mockbukkit.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
 
-  <!-- File-based repo (bukkit/repo) holding the binary-only com.hazebyte:base jar -->
-  <repositories>
-    <repository>
-      <id>in-project-libs</id>
-      <name>In-project library mirror</name>
-      <url>file://${project.basedir}/repo</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
   <build>
-    <finalName>${parent.artifactId}-bukkit-${project.version}</finalName>
+    <finalName>${project.parent.artifactId}-bukkit-${project.version}-${crate.family}</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <!-- The 1.20 family has no MockBukkit 4.x: compile main code only; tests are covered by mc121/mc26. -->
+        <executions>
+          <execution>
+            <id>default-testCompile</id>
+            <configuration>
+              <skip>${crate.skipServerTests}</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skip>${crate.skipServerTests}</skip>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -182,7 +172,6 @@
               <!-- EffectLib's version-dispatching particle backends; each is a separate reactor jar. -->
               <include>com.elmakers.mine.bukkit.compatibility:*</include>
               <include>com.hazebyte.crate:common</include>
-              <include>com.hazebyte:base</include>
               <include>com.hazebyte:CrateReloadedAPI</include>
               <include>com.hazebyte:utils</include>
               <include>org.bstats</include>
@@ -191,7 +180,6 @@
               <!-- Dagger 2.60's generated components reference jakarta.inject.Provider. -->
               <include>jakarta.inject:jakarta.inject-api</include>
               <include>org.mapstruct:mapstruct</include>
-              <include>de.tr7zw:item-nbt-api</include>
             </includes>
           </artifactSet>
           <relocations>
@@ -222,10 +210,6 @@
             <relocation>
               <pattern>org.mapstruct</pattern>
               <shadedPattern>com.hazebyte.libs.org.mapstruct</shadedPattern>
-            </relocation>
-            <relocation>
-              <pattern>de.tr7zw.changeme.nbtapi</pattern>
-              <shadedPattern>com.hazebyte.libs.de.tr7zw</shadedPattern>
             </relocation>
             <relocation>
               <pattern>de.slikey</pattern>

@@ -21,11 +21,26 @@
   </modules>
 
   <properties>
+    <!-- Build family defaults = Minecraft 26.x (profile mc26). See the mc121 / mc120 profiles below
+         and COMPATIBILITY-MATRIX.md. Each family compiles against the LOWEST Paper API it claims. -->
+    <crate.family>mc26</crate.family>
+    <!-- Minecraft range the family claims (checked at startup by compat.BuildFamily). -->
+    <crate.minecraft.min>26.1</crate.minecraft.min>
+    <crate.minecraft.max>26.3</crate.minecraft.max>
     <java.version>25</java.version>
-    <paper.api.version>26.1.2.build.72-stable</paper.api.version>
+    <!-- 26.3 build 249: newest build MockBukkit 4.124.0 loads (build 261 adds registries MockBukkit lacks).
+         The main code also compiles against 26.3.build.261-stable; that check runs in CI. -->
+    <paper.api.version>26.3.build.249-stable</paper.api.version>
+    <!-- Newest API of the family that MockBukkit supports. The build scripts run the test suite a second
+         time with -Dpaper.api.version=${paper.ceiling.api.version}; the shipped jar is always the floor build. -->
+    <paper.ceiling.api.version>26.3.build.249-stable</paper.ceiling.api.version>
+    <plugin.api.version>26.1</plugin.api.version>
+    <mockbukkit.artifact>mockbukkit-v26.3</mockbukkit.artifact>
+    <mockbukkit.version>4.124.0</mockbukkit.version>
+    <!-- MockBukkit 4.x exists only for 1.21+ / 26.x; the 1.20 family skips the server-mock test suite. -->
+    <crate.skipServerTests>false</crate.skipServerTests>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>${java.version}</maven.compiler.source>
-    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <maven.compiler.release>${java.version}</maven.compiler.release>
     <mapstruct.version>1.6.3</mapstruct.version>
   </properties>
 
@@ -42,7 +57,7 @@
     </repository>
     <repository>
       <id>codemc</id>
-      <name>CodeMC - hosts de.tr7zw:item-nbt-api</name>
+      <name>CodeMC</name>
       <url>https://repo.codemc.io/repository/maven-public/</url>
     </repository>
     <repository>
@@ -163,8 +178,7 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.14.1</version>
           <configuration>
-            <source>${java.version}</source>
-            <target>${java.version}</target>
+            <release>${java.version}</release>
             <annotationProcessorPaths>
               <path>
                 <groupId>org.mapstruct</groupId>
@@ -259,6 +273,45 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <profiles>
+    <!-- Minecraft 26.1 - 26.3, Java 25. Default. -->
+    <profile>
+      <id>mc26</id>
+      <activation><activeByDefault>true</activeByDefault></activation>
+    </profile>
+    <!-- Minecraft 1.21 - 1.21.11, Java 21. Compiled against the lowest API of the family. -->
+    <profile>
+      <id>mc121</id>
+      <properties>
+        <crate.family>mc121</crate.family>
+        <crate.minecraft.min>1.21</crate.minecraft.min>
+        <crate.minecraft.max>1.21.11</crate.minecraft.max>
+        <java.version>21</java.version>
+        <paper.api.version>1.21.1-R0.1-SNAPSHOT</paper.api.version>
+        <paper.ceiling.api.version>1.21.11-R0.1-SNAPSHOT</paper.ceiling.api.version>
+        <plugin.api.version>1.21</plugin.api.version>
+        <mockbukkit.artifact>mockbukkit-v1.21</mockbukkit.artifact>
+        <mockbukkit.version>4.116.3</mockbukkit.version>
+      </properties>
+    </profile>
+    <!-- Minecraft 1.20.1 - 1.20.4, Java 17. -->
+    <profile>
+      <id>mc120</id>
+      <properties>
+        <crate.family>mc120</crate.family>
+        <crate.minecraft.min>1.20.1</crate.minecraft.min>
+        <crate.minecraft.max>1.20.6</crate.minecraft.max>
+        <java.version>17</java.version>
+        <paper.api.version>1.20.1-R0.1-SNAPSHOT</paper.api.version>
+        <paper.ceiling.api.version>1.20.4-R0.1-SNAPSHOT</paper.ceiling.api.version>
+        <plugin.api.version>1.20</plugin.api.version>
+        <mockbukkit.artifact>mockbukkit-v1.21</mockbukkit.artifact>
+        <mockbukkit.version>4.116.3</mockbukkit.version>
+        <crate.skipServerTests>true</crate.skipServerTests>
+      </properties>
+    </profile>
+  </profiles>
 
   <reporting>
     <plugins>

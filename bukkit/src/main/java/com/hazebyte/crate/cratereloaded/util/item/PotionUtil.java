@@ -1,5 +1,6 @@
 package com.hazebyte.crate.cratereloaded.util.item;
 
+import com.hazebyte.crate.cratereloaded.compat.PotionCompat;
 import java.util.Collection;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
@@ -7,7 +8,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionBrewer;
-import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 
@@ -111,7 +111,7 @@ public class PotionUtil {
         Validate.isTrue(to.hasItemMeta(), "given itemstack is not a potion");
         Validate.isTrue(to.getItemMeta() instanceof PotionMeta, "given itemstack is not a potion");
         PotionMeta meta = (PotionMeta) to.getItemMeta();
-        meta.setBasePotionData(new PotionData(type, extended, level == 2));
+        PotionCompat.setBase(meta, type, extended, level == 2);
         to.setItemMeta(meta);
     }
 
@@ -262,7 +262,8 @@ public class PotionUtil {
         }
         ItemStack itemStack = new ItemStack(material, amount);
         PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
-        meta.setBasePotionData(new PotionData(type, level == 2, extended));
+        // Previously PotionData(type, upgraded, extended): the two flags were swapped.
+        PotionCompat.setBase(meta, type, extended, level == 2);
         itemStack.setItemMeta(meta);
         return itemStack;
     }
@@ -283,43 +284,43 @@ public class PotionUtil {
         PotionType type;
         switch (damage & POTION_BIT) {
             case 1:
-                type = PotionType.REGENERATION;
+                type = PotionCompat.type("REGENERATION", "REGEN");
                 break;
             case 2:
-                type = PotionType.SWIFTNESS;
+                type = PotionCompat.type("SWIFTNESS", "SPEED");
                 break;
             case 3:
-                type = PotionType.FIRE_RESISTANCE;
+                type = PotionCompat.type("FIRE_RESISTANCE");
                 break;
             case 4:
-                type = PotionType.POISON;
+                type = PotionCompat.type("POISON");
                 break;
             case 5:
-                type = PotionType.HEALING;
+                type = PotionCompat.type("HEALING", "INSTANT_HEAL");
                 break;
             case 6:
-                type = PotionType.NIGHT_VISION;
+                type = PotionCompat.type("NIGHT_VISION");
                 break;
             case 8:
-                type = PotionType.WEAKNESS;
+                type = PotionCompat.type("WEAKNESS");
                 break;
             case 9:
-                type = PotionType.STRENGTH;
+                type = PotionCompat.type("STRENGTH");
                 break;
             case 10:
-                type = PotionType.SLOWNESS;
+                type = PotionCompat.type("SLOWNESS");
                 break;
             case 11:
-                type = PotionType.LEAPING;
+                type = PotionCompat.type("LEAPING", "JUMP");
                 break;
             case 12:
-                type = PotionType.HARMING;
+                type = PotionCompat.type("HARMING", "INSTANT_DAMAGE");
                 break;
             case 13:
-                type = PotionType.WATER_BREATHING;
+                type = PotionCompat.type("WATER_BREATHING");
                 break;
             case 14:
-                type = PotionType.INVISIBILITY;
+                type = PotionCompat.type("INVISIBILITY");
                 break;
             default:
                 type = PotionType.WATER;
@@ -363,24 +364,26 @@ public class PotionUtil {
      */
     public static PotionType matchType(String name) {
         switch (name.toUpperCase()) {
+            // Modern name first, then the pre-1.20.5 name: whichever exists on this server wins.
             case "SPEED":
-                return PotionType.SWIFTNESS;
+            case "SWIFTNESS":
+                return PotionCompat.type("SWIFTNESS", "SPEED");
             case "JUMP":
-                return PotionType.LEAPING;
+            case "LEAPING":
+                return PotionCompat.type("LEAPING", "JUMP");
             case "INSTANT_HEAL":
-                return PotionType.HEALING;
+            case "HEALING":
+                return PotionCompat.type("HEALING", "INSTANT_HEAL");
             case "INSTANT_DAMAGE":
-                return PotionType.HARMING;
+            case "HARMING":
+                return PotionCompat.type("HARMING", "INSTANT_DAMAGE");
             case "REGEN":
-                return PotionType.REGENERATION;
+            case "REGENERATION":
+                return PotionCompat.type("REGENERATION", "REGEN");
             case "UNCRAFTABLE":
-                return PotionType.WATER;
+                return PotionCompat.type("WATER");
             default:
-                try {
-                    return PotionType.valueOf(name.toUpperCase());
-                } catch (IllegalArgumentException ignored) {
-                    return null;
-                }
+                return PotionCompat.type(name.toUpperCase());
         }
     }
 

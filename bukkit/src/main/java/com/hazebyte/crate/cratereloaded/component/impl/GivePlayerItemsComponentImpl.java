@@ -57,7 +57,8 @@ public class GivePlayerItemsComponentImpl implements GivePlayerItemsComponent {
                 continue;
             }
 
-            player.getWorld().dropItemNaturally(player.getLocation(), leftOverItem);
+            // Split into legal stacks: an oversized dropped stack would be picked up as one stack (#486).
+            ItemCalculatorUtil.dropNaturally(player.getLocation(), leftOverItem);
             result.add(GiveItemExecutorResult.DROPPED_TO_WORLD);
         }
         return result.isEmpty() ? EnumSet.noneOf(GiveItemExecutorResult.class) : EnumSet.copyOf(result);

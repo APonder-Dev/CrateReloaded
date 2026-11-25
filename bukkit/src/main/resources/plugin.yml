@@ -5,4 +5,4 @@ authors: [dinosaur, RebornIV]
 website: crate.hazebyte.com
 depend:
 softdepend: [Essentials, Vault, Holograms, Citizens, Multiverse-Core, PlaceholderAPI, CMI, DecentHolograms]
-api-version: 26.1
+api-version: '${plugin.api.version}'

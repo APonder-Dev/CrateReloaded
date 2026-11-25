@@ -109,6 +109,13 @@ crate:
   # Are players allowed to put crate items into item frames
   item-frame: false
 
+  # Are players allowed to move crate items with hotbar number keys inside inventories
+  hotbar: false
+
+  # Crate sounds (effects with class: Sound) are heard only by the player opening the crate.
+  # false = everyone nearby hears them.
+  private-sounds: false
+
   # Animation Exiting
   # Allows players to exit animations that have not yet been completed
   early-animation-exit: false

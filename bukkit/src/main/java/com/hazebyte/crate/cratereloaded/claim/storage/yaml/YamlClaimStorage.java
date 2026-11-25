@@ -21,6 +21,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,9 +34,36 @@ public class YamlClaimStorage implements ClaimStorage {
     private final JavaPlugin plugin;
     private final ClaimExecutor claimExecutor;
 
+    /**
+     * All claim I/O runs on this one thread. Before, every operation went to the common ForkJoin pool, so
+     * two writes for the same player could run concurrently against the same unsynchronised YAML object, or
+     * finish in the wrong order (e.g. delete-before-save of a pending crate claim, #540).
+     */
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(runnable -> {
+        Thread thread = new Thread(runnable, "CrateReloaded-claims");
+        thread.setDaemon(true);
+        return thread;
+    });
+
     public YamlClaimStorage(JavaPlugin plugin, ClaimExecutor claimExecutor) {
         this.plugin = plugin;
         this.claimExecutor = claimExecutor;
+    }
+
+    /**
+     * Stops accepting work and waits for queued saves and deletes to reach disk. Called on plugin disable.
+     *
+     * @param timeoutSeconds how long to wait
+     * @return whether every queued operation finished
+     */
+    public boolean close(long timeoutSeconds) {
+        executor.shutdown();
+        try {
+            return executor.awaitTermination(timeoutSeconds, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
     }
 
     protected Config getConfig(OfflinePlayer player) {
@@ -78,7 +108,17 @@ public class YamlClaimStorage implements ClaimStorage {
         }
 
         if (claim.get().getRewards() == null || claim.get().getRewards().size() == 0) {
-            deleteClaimSync(claim.get());
+            // Delete only claims that really are empty. If rewards are stored but none parsed (e.g. written by an
+            // older version), deleting would destroy the player's reward for good: keep it and say so.
+            List<String> stored = config.getConfig().getStringList(String.format(CONFIG_REWARDS_KEY, key));
+            if (stored.isEmpty()) {
+                deleteClaimSync(claim.get());
+            } else {
+                plugin.getLogger()
+                        .warning(String.format(
+                                "Claim %s of %s has %d reward(s) that could not be parsed; kept on disk, not shown",
+                                key, offlinePlayer.getUniqueId(), stored.size()));
+            }
             return null;
         }
 
@@ -92,6 +132,9 @@ public class YamlClaimStorage implements ClaimStorage {
             Config config = getConfig(player);
             Collection<Claim> claims = new ArrayList<>();
             for (String key : config.getConfig().getKeys(false)) {
+                if (!config.getConfig().isSet(key)) {
+                    continue; // removed since the key list was taken (#601); nothing to parse
+                }
                 try {
                     Optional<Claim> claim = Optional.ofNullable(parse(config, key, player));
                     claim.ifPresent(claims::add);
@@ -105,7 +148,7 @@ public class YamlClaimStorage implements ClaimStorage {
                 }
             }
             return claims;
-        });
+        }, executor);
     }
 
     /**
@@ -142,7 +185,7 @@ public class YamlClaimStorage implements ClaimStorage {
                                 e);
                 throw new CompletionException(e);
             }
-        });
+        }, executor);
     }
 
     /**
@@ -171,6 +214,6 @@ public class YamlClaimStorage implements ClaimStorage {
     public CompletableFuture<Void> deleteClaim(Claim claim) throws CompletionException {
         return CompletableFuture.runAsync(() -> {
             deleteClaimSync(claim);
-        });
+        }, executor);
     }
 }

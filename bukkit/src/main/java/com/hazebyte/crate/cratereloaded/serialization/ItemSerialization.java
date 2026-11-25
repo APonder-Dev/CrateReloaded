@@ -9,8 +9,6 @@ import com.hazebyte.crate.cratereloaded.CorePlugin;
 import com.hazebyte.crate.cratereloaded.util.StringUtils;
 import com.hazebyte.crate.cratereloaded.util.item.ItemUtil;
 import com.hazebyte.util.Mat;
-import de.tr7zw.changeme.nbtapi.NBT;
-import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
 import java.util.Map;
 import lombok.NonNull;
 import org.bukkit.Color;
@@ -108,10 +106,14 @@ public class ItemSerialization {
             // A potion is extended if the time is increased from 45s to 1m 30s
             // A potion is upgraded if it is AMPLIFIER II instead of I
             PotionData potionData = potionMeta.getBasePotionData();
+            if (potionData == null || potionData.getType().getEffectType() == null) {
+                return; // water, awkward, mundane, ...: no effect to serialise
+            }
             appendData(
                     stringBuilder, EFFECT, potionData.getType().getEffectType().getName());
             appendData(stringBuilder, POWER, potionData.isUpgraded() ? 2 : 1);
-            appendData(stringBuilder, DURATION, potionData.isExtended() ? 90 * 20 : 45 * 20);
+            // Seconds, like the custom-effect branch above: ItemParser multiplies DURATION by 20.
+            appendData(stringBuilder, DURATION, potionData.isExtended() ? 90 : 45);
             appendData(stringBuilder, SPLASH, itemStack.getType() == Material.SPLASH_POTION);
         }
     }
@@ -150,21 +152,6 @@ public class ItemSerialization {
         }
     }
 
-    private static void appendNbtData(@NonNull StringBuilder stringBuilder, @NonNull ItemStack itemStack) {
-        if (CorePlugin.getPlugin().getServerVersion().isMockServer()) {
-            return;
-        }
-        try {
-            ReadWriteNBT nbt = NBT.itemStackToNBT(itemStack);
-            ReadWriteNBT nbtTag = nbt.getCompound(TAG);
-
-            appendData(stringBuilder, nbtTag);
-        } catch (Exception ignored) {
-            Messenger.warning(
-                    String.format("There was an error with NBT serialization for [%s]", itemStack.toString()));
-        }
-    }
-
     public static String serialize(@NonNull ItemStack item) {
         StringBuilder stringBuilder = new StringBuilder();
         Material material = item.getType();
@@ -178,7 +165,8 @@ public class ItemSerialization {
         appendPotionOrTippedArrowMeta(stringBuilder, item);
         appendPlayerHead(stringBuilder, item);
         appendColorData(stringBuilder, item);
-        //        appendNbtData(stringBuilder, item);
+        // Item NBT is deliberately not serialised: the old appendNbtData (item-nbt-api) warned on every crate
+        // open on newer servers (#599) and wrote NBT the parser could not read back (#600). Removed with the library.
 
         return stringBuilder.toString().trim().replace("§", "&");
     }

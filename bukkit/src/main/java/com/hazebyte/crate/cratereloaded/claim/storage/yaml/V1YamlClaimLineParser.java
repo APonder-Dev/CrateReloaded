@@ -44,7 +44,10 @@ public class V1YamlClaimLineParser implements YamlClaimLineParser {
 
         Function<String, Reward> stringToRewardFn =
                 s -> CorePlugin.getPlugin().getCrateRegistrar().createReward(s);
-        List<Reward> rewards = rewardList.stream().map(stringToRewardFn).collect(Collectors.toList());
+        List<Reward> rewards = rewardList.stream()
+                .map(stringToRewardFn)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toList());
         CrateClaim claim = CrateClaim.builder()
                 .owner(player)
                 .rewards(rewards)

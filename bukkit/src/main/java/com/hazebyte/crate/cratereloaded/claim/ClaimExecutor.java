@@ -61,6 +61,12 @@ public class ClaimExecutor implements Function<Claim, Boolean> {
             return false;
         }
 
+        // A crate animation's pending claim (#540) only becomes redeemable once the animation is settled;
+        // redeeming it earlier would pay the prize twice.
+        if (plugin.getOpeningLedger() != null && plugin.getOpeningLedger().isPending(claim.getId())) {
+            return false;
+        }
+
         if (PlayerUtil.isInventoryFull(player)) {
             String message = CrateAPI.getMessage("core.claim_inventory_full");
             Messenger.tell(player, CustomFormat.format(message, player));
@@ -73,19 +79,28 @@ public class ClaimExecutor implements Function<Claim, Boolean> {
     protected void executeEvent(ClaimEvent event) {
         Player player = event.getClaim().getOwner().getPlayer();
         for (Reward reward : event.getClaim().getRewards()) {
+            if (reward == null) {
+                continue; // never let one bad entry abort the whole claim (#600)
+            }
             openCrateComponent.executeReward(player, reward);
         }
 
-        String message = CustomFormat.format(
-                CrateAPI.getMessage("core.claim_successful"),
-                event.getClaim().getRewards().get(0));
-        Messenger.tell(player, message);
+        Reward first = event.getClaim().getRewards().stream()
+                .filter(java.util.Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+        if (first != null) {
+            String message = CustomFormat.format(CrateAPI.getMessage("core.claim_successful"), first);
+            Messenger.tell(player, message);
+        }
     }
 
     protected void logEvent(ClaimEvent event) {
         JSONObject jsonObject = new JSONObject();
         JSONArray jsonRewards = new JSONArray();
-        event.getClaim().getRewards().stream().forEach(reward -> jsonRewards.add(reward.toString()));
+        event.getClaim().getRewards().stream()
+                .filter(java.util.Objects::nonNull)
+                .forEach(reward -> jsonRewards.add(reward.toString()));
         jsonObject.put("player", event.getClaim().getOwner().getPlayer().getName());
         jsonObject.put("rewards", jsonRewards);
 

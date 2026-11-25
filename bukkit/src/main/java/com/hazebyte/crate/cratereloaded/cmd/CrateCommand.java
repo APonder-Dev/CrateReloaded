@@ -272,12 +272,13 @@ public class CrateCommand extends BaseCommand {
 
     @Subcommand("give all")
     @CommandPermission("cr.give.all")
-    @CommandCompletion("@crates @range:64")
-    @Syntax("<crate> [number]")
-    @Description("Give a specific number of crates to all players")
-    public void onAll(CommandSender sender, Crate crate, @Default("1") Integer amount) {
+    @CommandCompletion("@crates @range:64 @status")
+    @Syntax("<crate> [number] [online/offline]")
+    @Description("Give a specific number of crates to all online players (offline: into their /cr claim)")
+    public void onAll(
+            CommandSender sender, Crate crate, @Default("1") Integer amount, @Default("online") Boolean isOnline) {
         GiveCrateComponent component = CorePlugin.getJavaPluginComponent().getGiveCrateComponent();
-        component.giveCrateToAllOnlinePlayers(sender, crate, amount);
+        component.giveCrateToAllOnlinePlayers(sender, crate, amount, !isOnline);
     }
 
     @Subcommand("set")
