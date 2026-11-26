@@ -2,9 +2,14 @@
 
 All notable changes to CrateReloaded are documented here. Versions continue the existing release line.
 
-## [Unreleased] — modernization branch
+## [2.4.0] — 2026-11-26
+
+Three jars, one per Minecraft line: `CrateReloaded-2.4.0-mc26.jar` (26.1–26.3, Java 25),
+`CrateReloaded-2.4.0-mc121.jar` (1.21–1.21.11, Java 21) and `CrateReloaded-2.4.0-mc120.jar` (1.20.1–1.20.6, Java 17).
 
 ### Build
+- Jars are named `CrateReloaded-<version>-<family>.jar`. The jar now ships the MIT licence texts of the bundled
+  EffectLib (`LICENSE_EFFECTLIB`) and CrateReloaded API (`LICENSE_CRATERELOADEDAPI`).
 - Removed the binary-only, unlicensed `com.hazebyte:base:0.0.1` jar and the in-project `bukkit/repo` file
   repository. Its only use (`ItemBuilder` in `ConfigConstants`) now uses the in-tree, MIT-licensed
   `com.hazebyte.crate.api.util.ItemBuilder`, which applies the same `&`-code replacement. The build is now
@@ -12,13 +17,13 @@ All notable changes to CrateReloaded are documented here. Versions continue the 
 
 - Three build families from one source tree: `mc26` (Java 25, Paper 26.3, default), `mc121` (Java 21, compiled
   against 1.21.1) and `mc120` (Java 17, compiled against 1.20.1). Select one with `-P<family>`. Jars are named
-  `crate-bukkit-<version>-<family>.jar`, and `plugin.yml` `api-version` comes from the profile. The compiler uses
+  `CrateReloaded-<version>-<family>.jar`, and `plugin.yml` `api-version` comes from the profile. The compiler uses
   `release` instead of `source`/`target`.
 - Paper API 26.1.2 → 26.3 (build 249, the newest build MockBukkit loads; the main code also compiles against build 261).
   MockBukkit `mockbukkit-v26.1.2` 4.113.3 → `mockbukkit-v26.3` 4.124.0.
 - The vendored EffectLib core follows the build family. Its Compatibility backends now target Java 17.
 - `-Dcratereloaded.debugRewards=true` (JVM flag) logs every reward paid out (constant flag, item count, commands),
-  for support and the in-game test harness.
+  for support and testing.
 - `build.sh`: the mc121 test run now compiles EffectLib against the same 1.21.11 API as the plugin. With 1.21.1 it
   crashed on any Sound effect in tests (`Sound` became an interface in 1.21.3). The shipped jars weren't affected.
 - Added `build.sh` / `build.bat`, which build every family with the matching JDK, and `scripts/check-bytecode.py`,
@@ -51,7 +56,7 @@ All notable changes to CrateReloaded are documented here. Versions continue the 
 - **First start ran on built-in defaults.** Settings loaded `config.yml` before the bundled default was written, so a
   fresh install logged a "Configuration key … is not set" warning per key and ignored the shipped values (prefix,
   timezone, hologram plugin, claim settings…) until the first `/cr reload`. The default `config.yml` is now
-  written first, only if it is missing. Found on the DrugRun Paper 26.3 server.
+  written first, only if it is missing. Found on a Paper 26.3 test server with 20 other plugins.
 - **#494 / #397: `always:()` rewards were never given, on any crate.** The crate parser kept `always:()` lines in
   the random pool (flagged constant, but with `chance:(0)`, so never drawn), and the constant-reward list stayed
   empty. They are now split into the constant list when `crate.yml` loads. They are given on every instant,
@@ -136,10 +141,13 @@ All notable changes to CrateReloaded are documented here. Versions continue the 
 - `onDisable` no longer throws when startup stopped early.
 
 ### Documentation
+- The bundled `crate.yml` now has an example for every animation: CSGO_REVERSE, RECTANGLE, RECTANGLE_REVERSE and
+  HEART, CSGO with the RANDOM end animation, and an animated mystery crate (`FoodBox`). Existing installs only get
+  them by copying the new crates in. All of them were tested in game on 1.20.4, 1.21.11 and 26.1.2.
 - Added `FORK_COMPARISON.md`, `DEPENDENCY_AUDIT.md` and `BASELINE.md` (Milestone A audit).
 - Added `COMPATIBILITY-MATRIX.md`.
 
-## [2.4.0] — Fruit-Servers fork (baseline)
+### Included from the Fruit-Servers fork
 - Java 25 / Paper API 26.1.2, MockBukkit 26.x + JUnit 6, EffectLib 11.x vendored, DecentHolograms replaces
   HolographicDisplays, ProGuard removed, 26.x version parsing, player-head textures via `PlayerProfile` (#612),
   concurrent-open guard and no key consumption on rejected opens. See `FORK_COMPARISON.md` for details.

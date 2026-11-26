@@ -114,7 +114,7 @@ public final class BuildFamily {
                         format(server),
                         required == null
                                 ? "No CrateReloaded build supports this version."
-                                : "Install the " + required + " build (crate-bukkit-<version>-" + required + ".jar).");
+                                : "Install the " + required + " build (CrateReloaded-<version>-" + required + ".jar).");
             case UNTESTED:
                 return String.format(
                         "Minecraft %s is outside the range this %s build was tested on (%s - %s).",

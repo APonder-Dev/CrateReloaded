@@ -52,7 +52,7 @@ build_family() {
     mc120)
       "${MVN[@]}" -P"$family" clean verify ;;
   esac
-  local jar="bukkit/target/crate-bukkit-$VERSION-$family.jar"
+  local jar="bukkit/target/CrateReloaded-$VERSION-$family.jar"
   python3 scripts/check-bytecode.py "$jar" "$release" 2>/dev/null || python scripts/check-bytecode.py "$jar" "$release"
   cp "$jar" dist/
 }

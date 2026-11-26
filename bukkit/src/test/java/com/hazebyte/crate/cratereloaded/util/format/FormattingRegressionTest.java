@@ -30,7 +30,7 @@ class FormattingRegressionTest extends BukkitTest {
         FileConfiguration config = config();
         // As documented: custom-variables: '{sword_enchant}': 'sharpness:1 knockback:1'
         config.set("custom-variables.{sword_enchant}", "sharpness:1 knockback:1");
-        config.set("custom-variables.{server}", "&6DrugRun");
+        config.set("custom-variables.{server}", "&6MyServer");
         plugin.getSettings().clearCache();
     }
 
@@ -40,7 +40,7 @@ class FormattingRegressionTest extends BukkitTest {
         Assertions.assertEquals(1, sword.getEnchantmentLevel(Enchantment.SHARPNESS), "variable with spaces expands");
         Assertions.assertEquals(1, sword.getEnchantmentLevel(Enchantment.KNOCKBACK));
         Assertions.assertEquals(
-                "DrugRun Blade", ChatColor.stripColor(sword.getItemMeta().getDisplayName()), "variable in a name");
+                "MyServer Blade", ChatColor.stripColor(sword.getItemMeta().getDisplayName()), "variable in a name");
     }
 
     @Test
@@ -54,7 +54,7 @@ class FormattingRegressionTest extends BukkitTest {
     void customVariables_expandInRewardDisplays() {
         RewardImpl reward = new RewardImpl("chance:(1), display:(DIRT 1 name:{server}_Prize)");
         Assertions.assertEquals(
-                "DrugRun Prize", ChatColor.stripColor(reward.getDisplayItem().getItemMeta().getDisplayName()));
+                "MyServer Prize", ChatColor.stripColor(reward.getDisplayItem().getItemMeta().getDisplayName()));
     }
 
     @Test

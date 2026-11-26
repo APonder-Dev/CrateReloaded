@@ -13,7 +13,7 @@ more), weighted rewards, previews, holograms and a claim system for rewards that
 
 This is a maintained modernization of [Hazebyte's CrateReloaded](https://github.com/Hazebyte/CratePlugin), built on
 the [Fruit-Servers fork](https://github.com/Fruit-Servers/CratePlugin). It keeps the plugin name, commands, data
-folder and configuration format, so existing `config.yml`, `crate.yml` and claim files keep working.
+folder and configuration format, so existing `config.yml`, crate files (`crates/*.yml`) and claim files keep working.
 
 ---
 
@@ -23,9 +23,9 @@ One source tree builds three jars. Install **one** of them, for your server's Mi
 
 | Server | Jar | Java on the server |
 |---|---|---|
-| Minecraft 26.1 – 26.3 | `crate-bukkit-2.4.0-mc26.jar` | 25 |
-| Minecraft 1.21 – 1.21.11 | `crate-bukkit-2.4.0-mc121.jar` | 21 |
-| Minecraft 1.20.1 – 1.20.6 | `crate-bukkit-2.4.0-mc120.jar` | 17 (21 for 1.20.5+) |
+| Minecraft 26.1 – 26.3 | `CrateReloaded-2.4.0-mc26.jar` | 25 |
+| Minecraft 1.21 – 1.21.11 | `CrateReloaded-2.4.0-mc121.jar` | 21 |
+| Minecraft 1.20.1 – 1.20.6 | `CrateReloaded-2.4.0-mc120.jar` | 17 (21 for 1.20.5+) |
 
 If you install the wrong one, the plugin says which jar you need and disables itself. Start the server with
 `-Dcratereloaded.allowUnsupportedVersion=true` to override this. Older versions (1.19.4 and below) are not
@@ -35,8 +35,8 @@ supported.
 
 | Version | Status |
 |---|---|
-| Paper 1.20.4, 1.21.11, 26.1.2 | **Supported with limitations**: passed in-game bot tests (crate openings of every type, an attempt to take items from an animation, quitting mid-animation, offline gives) |
-| Paper 26.3 | Experimental: starts, loads crates and reloads cleanly; the bot can't join 26.3 yet |
+| Paper 1.20.4, 1.21.11, 26.1.2 | **Supported with limitations**: passed in-game tests (crate openings of every type, an attempt to take items from an animation, quitting mid-animation, offline gives) |
+| Paper 26.3 | Experimental: starts, loads crates and reloads cleanly; not yet played in game |
 | Other 1.20.x / 1.21.x / 26.x releases | Not yet tested; the jar is compiled against the lowest API of its family |
 | Spigot | Not yet tested |
 
@@ -71,7 +71,8 @@ Highlights. The full list is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Configuration and commands
 
-Everything is configured in `plugins/CrateReloaded/config.yml` and `crate.yml`. The original documentation still
+Everything is configured in `plugins/CrateReloaded/config.yml` and the crate files in `crates/`. Full documentation:
+[the wiki](https://github.com/APonder-Dev/CrateReloaded/wiki). The original documentation still
 applies: [crate.hazebyte.com](https://crate.hazebyte.com/).
 
 New or changed options in 2.4.0:
@@ -129,7 +130,7 @@ mvn clean package -Pmc121       # 1.21 jar
 mvn clean package -Pmc120       # 1.20 jar (use JDK 17)
 ```
 
-The jar is written to `bukkit/target/crate-bukkit-<version>-<family>.jar`.
+The jar is written to `bukkit/target/CrateReloaded-<version>-<family>.jar`.
 
 ### Code style
 
