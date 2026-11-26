@@ -141,8 +141,8 @@ public class YamlCrateV2ParserImpl {
                     .declineButton(parseDeclineButton(section))
                     .minimumRewards(section.getInt(REWARD_MINIMUM_REWARDS, 1))
                     .maximumRewards(section.getInt(REWARD_MAXIMUM_REWARDS, 1))
-                    .rewards(parseRewards(section, crateName))
-                    .constantRewards(parseConstantRewards(section, crateName))
+                    .rewards(randomRewards(section, crateName))
+                    .constantRewards(allConstantRewards(section, crateName))
                     .holographicText(parseHolographicText(section))
                     .effectCategoryToId(parseEffects(section, crateName))
                     .build();
@@ -310,6 +310,35 @@ public class YamlCrateV2ParserImpl {
 
         log.warning(String.format("Crate [%s] has no rewards defined", crateName));
         return Collections.emptyList();
+    }
+
+    /**
+     * Rewards drawn at random: every parsed reward that is not {@code always:()}.
+     *
+     * <p>Legacy configs put {@code always:()} rewards in the same {@code reward.rewards} list. They used to stay
+     * there, flagged constant but with {@code chance:(0)}, and the constant list stayed empty, so they were never
+     * given on any crate (#494, #397).
+     */
+    private List<RewardV2> randomRewards(@NonNull ConfigurationSection section, @NonNull String crateName) {
+        List<RewardV2> rewards = new ArrayList<>();
+        for (RewardV2 reward : parseRewards(section, crateName)) {
+            if (!reward.isConstant()) {
+                rewards.add(reward);
+            }
+        }
+        return rewards;
+    }
+
+    /** {@code always:()} rewards from {@code reward.rewards} plus any {@code constant-rewards:} section. */
+    private List<RewardV2> allConstantRewards(@NonNull ConfigurationSection section, @NonNull String crateName) {
+        List<RewardV2> constants = new ArrayList<>();
+        for (RewardV2 reward : parseRewards(section, crateName)) {
+            if (reward.isConstant()) {
+                constants.add(reward);
+            }
+        }
+        constants.addAll(parseConstantRewards(section, crateName));
+        return constants;
     }
 
     private List<RewardV2> parseConstantRewards(@NonNull ConfigurationSection section, @NonNull String crateName) {

@@ -17,6 +17,10 @@ All notable changes to CrateReloaded are documented here. Versions continue the 
 - Paper API 26.1.2 → 26.3 (build 249, the newest build MockBukkit loads; the main code also compiles against build 261).
   MockBukkit `mockbukkit-v26.1.2` 4.113.3 → `mockbukkit-v26.3` 4.124.0.
 - The vendored EffectLib core follows the build family. Its Compatibility backends now target Java 17.
+- `-Dcratereloaded.debugRewards=true` (JVM flag) logs every reward paid out (constant flag, item count, commands),
+  for support and the in-game test harness.
+- `build.sh`: the mc121 test run now compiles EffectLib against the same 1.21.11 API as the plugin. With 1.21.1 it
+  crashed on any Sound effect in tests (`Sound` became an interface in 1.21.3). The shipped jars weren't affected.
 - Added `build.sh` / `build.bat`, which build every family with the matching JDK, and `scripts/check-bytecode.py`,
   which fails the build if any class in a jar, shaded libraries included, needs a newer Java than the family targets.
 
@@ -44,6 +48,21 @@ All notable changes to CrateReloaded are documented here. Versions continue the 
 
   A pending claim cannot be redeemed while its animation is still running, so it can't be both claimed and
   won. The animation inventory is no longer reopened for a player who has left.
+- **First start ran on built-in defaults.** Settings loaded `config.yml` before the bundled default was written, so a
+  fresh install logged a "Configuration key … is not set" warning per key and ignored the shipped values (prefix,
+  timezone, hologram plugin, claim settings…) until the first `/cr reload`. The default `config.yml` is now
+  written first, only if it is missing. Found on the DrugRun Paper 26.3 server.
+- **#494 / #397: `always:()` rewards were never given, on any crate.** The crate parser kept `always:()` lines in
+  the random pool (flagged constant, but with `chance:(0)`, so never drawn), and the constant-reward list stayed
+  empty. They are now split into the constant list when `crate.yml` loads. They are given on every instant,
+  supply and mystery opening, and, as a second fix, on animated openings too: those used to pay only the reward
+  the animation landed on. Animated `always:()` rewards are part of the pending claim, so an interrupted
+  animation pays them too.
+- **V2 reward permissions were inverted.** The legacy `permission:(node)` tag excludes players who have the node,
+  and the mapper stores it as `exclusive-permissions`. The V2 prize rule, however, *required* those permissions
+  and ignored `inclusive-permissions`. Now `exclusive-permissions` excludes a player who has any of them, and
+  `inclusive-permissions` requires all of them. This only affected rewards drawn through the V2 animation API
+  (`CSGO_V2`/`ROULETTE_V2` aren't selectable from `crate.yml`).
 - **P1 batch.** #536: CSGO / CSGO_REVERSE now fill all seven visible slots, so no glass pane scrolls through
   the row. #586: `{player}` / `{player-name}` are now replaced in `item:` rewards (normal, V2 and supply delivery).
   #610: `{date}` in the claim menu is filled from the claim timestamp. #611: not reproducible with documented

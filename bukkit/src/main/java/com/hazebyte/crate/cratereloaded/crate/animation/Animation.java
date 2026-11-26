@@ -146,6 +146,7 @@ public abstract class Animation {
         new BukkitRunnable() {
             @Override
             public void run() {
+                List<Reward> extras = openingExtras(player);
                 boolean deliver = completeOpening(player);
                 removePlayerFromOpening(player);
                 if (crate == null || !deliver || !player.isOnline()) {
@@ -155,7 +156,9 @@ public abstract class Animation {
                     return;
                 }
 
-                crate.onRewards(player, rewards, location, (e) -> crate.runEffect(location, Category.END, player));
+                List<Reward> all = new ArrayList<>(rewards);
+                all.addAll(extras); // always:() rewards
+                crate.onRewards(player, all, location, (e) -> crate.runEffect(location, Category.END, player));
                 PlayerUtil.closeInventoryLater(player, 1);
             }
         }.runTaskLater(CorePlugin.getPlugin(), time);
@@ -163,10 +166,20 @@ public abstract class Animation {
 
     /** Starts the ledger session for this opening; {@code prize} is paid if the animation can't finish. */
     protected static void beginOpening(Player player, List<Reward> prize) {
+        beginOpening(player, prize, Collections.emptyList());
+    }
+
+    /** As {@link #beginOpening(Player, List)}, with rewards owed on top of the result ({@code always:()}). */
+    protected static void beginOpening(Player player, List<Reward> prize, List<Reward> extras) {
         OpeningLedger ledger = CorePlugin.getPlugin().getOpeningLedger();
         if (ledger != null) {
-            ledger.begin(player, prize);
+            ledger.begin(player, prize, extras);
         }
+    }
+
+    private static List<Reward> openingExtras(Player player) {
+        OpeningLedger ledger = CorePlugin.getPlugin().getOpeningLedger();
+        return ledger == null ? Collections.emptyList() : ledger.extras(player.getUniqueId());
     }
 
     /** @return whether the normal end of the animation should deliver (false if already aborted) */

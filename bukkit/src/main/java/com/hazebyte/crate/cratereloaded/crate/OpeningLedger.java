@@ -53,12 +53,19 @@ public class OpeningLedger {
         private final UUID playerId;
         private final Claim pendingClaim;
         private final List<Reward> prize;
+        private final List<Reward> extras;
         private final AtomicBoolean settled = new AtomicBoolean(false);
 
-        Session(UUID playerId, Claim pendingClaim, List<Reward> prize) {
+        Session(UUID playerId, Claim pendingClaim, List<Reward> prize, List<Reward> extras) {
             this.playerId = playerId;
             this.pendingClaim = pendingClaim;
             this.prize = prize;
+            this.extras = extras;
+        }
+
+        /** Rewards owed on top of the animation's result (e.g. {@code always:()} rewards). */
+        public List<Reward> getExtras() {
+            return extras;
         }
 
         public UUID getPlayerId() {
@@ -122,13 +129,26 @@ public class OpeningLedger {
      * @return the new session
      */
     public Session begin(OfflinePlayer player, List<Reward> prize) {
+        return begin(player, prize, Collections.emptyList());
+    }
+
+    /**
+     * @param player the player opening the crate
+     * @param prize what the player is owed if the animation can't finish (the fallback reward)
+     * @param extras rewards owed in addition to the animation's result either way, e.g. {@code always:()}
+     *     rewards. They are part of the pending claim and returned by {@link #extras} on normal completion.
+     * @return the new session
+     */
+    public Session begin(OfflinePlayer player, List<Reward> prize, List<Reward> extras) {
         UUID playerId = player.getUniqueId();
         if (sessions.containsKey(playerId)) {
             abort(playerId);
         }
-        List<Reward> copy = Collections.unmodifiableList(new ArrayList<>(prize));
+        List<Reward> owed = new ArrayList<>(prize);
+        owed.addAll(extras);
+        List<Reward> copy = Collections.unmodifiableList(owed);
         Claim claim = claimFactory.apply(player, copy);
-        Session session = new Session(playerId, claim, copy);
+        Session session = new Session(playerId, claim, copy, Collections.unmodifiableList(new ArrayList<>(extras)));
         sessions.put(playerId, session);
         run("save", claim, () -> store.save(claim));
         return session;
@@ -194,6 +214,15 @@ public class OpeningLedger {
             }
         }
         return false;
+    }
+
+    /**
+     * @param playerId the player
+     * @return the extra rewards of the player's open session (empty if none); read before {@link #complete}
+     */
+    public List<Reward> extras(UUID playerId) {
+        Session session = sessions.get(playerId);
+        return session == null ? Collections.emptyList() : session.extras;
     }
 
     /** @return whether the player has an animation in progress */

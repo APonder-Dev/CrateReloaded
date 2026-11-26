@@ -61,7 +61,12 @@ public abstract class BaseScroller extends Animation {
     public Inventory openCrate(Player player, Location location) {
         List<Reward> rewards = getRewards(player);
         // rewards.get(0) is what an interrupted opening has always paid out; persist it before animating.
-        beginOpening(player, Collections.singletonList(rewards.get(0)));
+        // always:() rewards are owed on every opening: animated crates used to never give them (only the
+        // reward the animation landed on), while instant and supply crates did.
+        List<Reward> always = crate.getConstantRewards().stream()
+                .filter(reward -> !reward.hasPermission(player))
+                .collect(java.util.stream.Collectors.toList());
+        beginOpening(player, Collections.singletonList(rewards.get(0)), always);
         AnimationHolder holder = new AnimationHolder(this, player, rewards, crate.getConstantRewards());
         Inventory inventory = Bukkit.createInventory(holder, size.getSize(), crate.getDisplayName());
 

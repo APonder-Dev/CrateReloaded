@@ -136,6 +136,25 @@ class OpeningLedgerTest {
     }
 
     @Test
+    void alwaysRewards_arePartOfTheClaim_andReturnedOnCompletion() {
+        Reward always = mock(Reward.class);
+        OpeningLedger.Session session = ledger.begin(owner, prizeList, Collections.singletonList(always));
+        Assertions.assertEquals(2, stored.get(session.getPendingClaim().getId()).getRewards().size(),
+                "prize + always reward are saved before the animation runs");
+        Assertions.assertEquals(Collections.singletonList(always), ledger.extras(playerId));
+        Assertions.assertTrue(ledger.complete(playerId));
+        Assertions.assertTrue(ledger.extras(playerId).isEmpty(), "settled sessions have no extras left");
+    }
+
+    @Test
+    void alwaysRewards_arePaidWhenAnAnimationIsInterrupted() {
+        handlingClaims.set(false);
+        ledger.begin(owner, prizeList, Collections.singletonList(mock(Reward.class)));
+        Assertions.assertTrue(ledger.abort(playerId));
+        Assertions.assertEquals(2, delivered.get(), "prize and always reward both delivered");
+    }
+
+    @Test
     void secondBegin_settlesTheFirstSession() {
         online = null;
         ledger.begin(owner, prizeList);

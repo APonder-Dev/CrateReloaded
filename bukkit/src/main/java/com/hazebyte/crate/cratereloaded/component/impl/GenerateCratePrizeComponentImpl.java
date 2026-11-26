@@ -69,12 +69,29 @@ public class GenerateCratePrizeComponentImpl implements GenerateCratePrizeCompon
     @Override
     public RewardV2 generateRewardForAnimation(Player player, CrateV2 crateV2) {
         List<Predicate<RewardV2>> rules = new ArrayList<>();
-        rules.add(reward ->
-                reward.getExclusivePermissions().stream().allMatch(permission -> player.hasPermission(permission)));
+        rules.add(reward -> isAllowed(reward, player));
         rules.add(reward -> reward.getChance() > 0);
         val rewardPool = generateRewardComponent.createPrizePoolV2(crateV2.getRewards(), rules);
         val rewardV2 = generateRewardComponent.generatePrizeV2(rewardPool);
         return rewardV2;
+    }
+
+    /**
+     * V2 reward permission rules, consistent with the legacy {@code permission:(node)} tag (which the mapper turns
+     * into {@code exclusivePermissions}):
+     *
+     * <ul>
+     *   <li>{@code exclusive-permissions}: the reward is <em>excluded</em> for a player who has any of them;
+     *   <li>{@code inclusive-permissions}: the reward is only available to a player who has all of them.
+     * </ul>
+     *
+     * <p>This used to require every exclusive permission and ignore the inclusive list, so a legacy
+     * {@code permission:} reward was inverted when it ran through a V2 animation.
+     */
+    static boolean isAllowed(RewardV2 reward, Player player) {
+        boolean excluded = reward.getExclusivePermissions().stream().anyMatch(player::hasPermission);
+        boolean included = reward.getInclusivePermissions().stream().allMatch(player::hasPermission);
+        return !excluded && included;
     }
 
     protected List<Reward> postParsing(List<Reward> rewards) {

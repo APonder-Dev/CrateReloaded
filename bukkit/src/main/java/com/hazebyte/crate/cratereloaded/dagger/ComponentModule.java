@@ -142,6 +142,12 @@ public class ComponentModule {
     @Singleton
     public FilePluginSettingComponentImpl provideFilePluginSettingComponentImpl(JavaPlugin javaPlugin) {
         File configFile = new File(javaPlugin.getDataFolder(), ConfigConstants.CONFIG_FILE_NAME);
+        // Settings are created before the config service writes the default files. On a first start the file
+        // didn't exist yet, so settings ran on built-in defaults and logged a "not set" warning per key until the
+        // next /cr reload. Write the bundled default first, only if missing (never overwrites a server's config).
+        if (!configFile.exists()) {
+            javaPlugin.saveResource(ConfigConstants.CONFIG_FILE_NAME, false);
+        }
         Config config = new Config(javaPlugin, configFile);
         return new FilePluginSettingComponentImpl(config, javaPlugin.getLogger());
     }

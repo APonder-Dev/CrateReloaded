@@ -28,10 +28,12 @@ public class RewardV2 {
     @Builder.Default
     List<String> commands = Collections.emptyList();
 
+    /** Excluded for a player who has any of these (legacy {@code permission:(node)}). */
     @NonNull
     @Builder.Default
     List<String> exclusivePermissions = Collections.emptyList();
 
+    /** Only available to a player who has all of these. */
     @NonNull
     @Builder.Default
     List<String> inclusivePermissions = Collections.emptyList();

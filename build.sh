@@ -46,7 +46,8 @@ build_family() {
         -Deffectlib.paper.api.version=26.3.build.261-stable
       "${MVN[@]}" -P"$family" clean verify ;;
     mc121)
-      "${MVN[@]}" -P"$family" clean verify -Dpaper.api.version="$ceiling"
+      # EffectLib must use the same ceiling API, or its enum-era Sound calls break on the 1.21.3+ interface.
+      "${MVN[@]}" -P"$family" clean verify -Dpaper.api.version="$ceiling" -Deffectlib.paper.api.version="$ceiling"
       "${MVN[@]}" -P"$family" clean package -DskipTests ;;
     mc120)
       "${MVN[@]}" -P"$family" clean verify ;;

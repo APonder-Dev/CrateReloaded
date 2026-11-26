@@ -98,6 +98,13 @@ public class OpenCrateComponentImpl implements OpenCrateComponent {
     @Override
     public Set<RewardExecutorResult> executeReward(@NonNull Player player, @NonNull Reward reward) {
         Set<RewardExecutorResult> rewardResults = new HashSet<>();
+        if (Boolean.getBoolean("cratereloaded.debugRewards")) {
+            // Support switch: -Dcratereloaded.debugRewards=true logs every reward paid out.
+            plugin.getLogger()
+                    .info(String.format(
+                            "[debugRewards] %s <- constant=%s items=%d commands=%s",
+                            player.getName(), reward.isConstant(), reward.getItems().size(), reward.getCommands(player)));
+        }
 
         /* Give items */
         // getItems(player), not getItems(): {player}/{player-name} in item: rewards were never replaced (#586).
