@@ -127,28 +127,31 @@ public class YamlClaimStorage implements ClaimStorage {
 
     @Override
     public CompletableFuture<Collection<Claim>> getClaims(OfflinePlayer player) {
-        return CompletableFuture.supplyAsync(() -> {
-            plugin.getLogger().finer("Claim: get all " + player.getUniqueId());
-            Config config = getConfig(player);
-            Collection<Claim> claims = new ArrayList<>();
-            for (String key : config.getConfig().getKeys(false)) {
-                if (!config.getConfig().isSet(key)) {
-                    continue; // removed since the key list was taken (#601); nothing to parse
-                }
-                try {
-                    Optional<Claim> claim = Optional.ofNullable(parse(config, key, player));
-                    claim.ifPresent(claims::add);
-                } catch (IllegalArgumentException | NullPointerException err) {
-                    plugin.getLogger()
-                            .log(
-                                    java.util.logging.Level.WARNING,
-                                    String.format(
-                                            "Unable to parse claim data for %s (key: %s)", player.getUniqueId(), key),
-                                    err);
-                }
-            }
-            return claims;
-        }, executor);
+        return CompletableFuture.supplyAsync(
+                () -> {
+                    plugin.getLogger().finer("Claim: get all " + player.getUniqueId());
+                    Config config = getConfig(player);
+                    Collection<Claim> claims = new ArrayList<>();
+                    for (String key : config.getConfig().getKeys(false)) {
+                        if (!config.getConfig().isSet(key)) {
+                            continue; // removed since the key list was taken (#601); nothing to parse
+                        }
+                        try {
+                            Optional<Claim> claim = Optional.ofNullable(parse(config, key, player));
+                            claim.ifPresent(claims::add);
+                        } catch (IllegalArgumentException | NullPointerException err) {
+                            plugin.getLogger()
+                                    .log(
+                                            java.util.logging.Level.WARNING,
+                                            String.format(
+                                                    "Unable to parse claim data for %s (key: %s)",
+                                                    player.getUniqueId(), key),
+                                            err);
+                        }
+                    }
+                    return claims;
+                },
+                executor);
     }
 
     /**
@@ -172,20 +175,22 @@ public class YamlClaimStorage implements ClaimStorage {
 
     @Override
     public CompletableFuture<Void> saveClaim(Claim claim) throws CompletionException {
-        return CompletableFuture.runAsync(() -> {
-            try {
-                saveClaimSync(claim);
-            } catch (IOException e) {
-                plugin.getLogger()
-                        .log(
-                                java.util.logging.Level.SEVERE,
-                                String.format(
-                                        "Failed to save claim for player %s",
-                                        claim.getOwner().getUniqueId()),
-                                e);
-                throw new CompletionException(e);
-            }
-        }, executor);
+        return CompletableFuture.runAsync(
+                () -> {
+                    try {
+                        saveClaimSync(claim);
+                    } catch (IOException e) {
+                        plugin.getLogger()
+                                .log(
+                                        java.util.logging.Level.SEVERE,
+                                        String.format(
+                                                "Failed to save claim for player %s",
+                                                claim.getOwner().getUniqueId()),
+                                        e);
+                        throw new CompletionException(e);
+                    }
+                },
+                executor);
     }
 
     /**
@@ -212,8 +217,10 @@ public class YamlClaimStorage implements ClaimStorage {
 
     @Override
     public CompletableFuture<Void> deleteClaim(Claim claim) throws CompletionException {
-        return CompletableFuture.runAsync(() -> {
-            deleteClaimSync(claim);
-        }, executor);
+        return CompletableFuture.runAsync(
+                () -> {
+                    deleteClaimSync(claim);
+                },
+                executor);
     }
 }

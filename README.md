@@ -104,41 +104,35 @@ Changed command:
 ### Requirements
 
 - Maven 3.9+
-- JDK 25, 21 and 17 to build all three families (JDK 25 alone is enough for `mc26`)
-- Python 3, used by the bytecode check in `build.sh`
+- The JDK for the family you build: 25 (`mc26`), 21 (`mc121`) or 17 (`mc120`)
+- Python 3 for the bytecode check (optional)
 
-### Build everything
-
-```bash
-./build.sh            # all three families -> dist/
-./build.sh mc26       # just one family
-OFFLINE=1 ./build.sh  # use only the local Maven cache
-```
-
-On Windows, run `build.bat` (it needs Git for Windows). The scripts look for each JDK in the usual install
-folders. Set `JAVA25_HOME`, `JAVA21_HOME` or `JAVA17_HOME` to point at a specific one.
-
-For each family the script builds the jar against that family's lowest API, runs the tests, and runs
-`scripts/check-bytecode.py`, which fails if any class in the jar, including bundled libraries, needs a newer
-Java than the family targets.
-
-### Build one family with Maven
+### Build a jar
 
 ```bash
-mvn clean verify                # mc26, with tests
-mvn clean package -Pmc121       # 1.21 jar
-mvn clean package -Pmc120       # 1.20 jar (use JDK 17)
+mvn clean verify                # mc26 (JDK 25), with tests
+mvn clean package -Pmc121       # 1.21 jar (JDK 21)
+mvn clean package -Pmc120       # 1.20 jar (JDK 17)
 ```
 
-The jar is written to `bukkit/target/CrateReloaded-<version>-<family>.jar`.
+The jar is written to `bukkit/target/CrateReloaded-<version>-<family>.jar`. To confirm it loads on the family's
+Java version (bundled libraries included), run:
+
+```bash
+python3 scripts/check-bytecode.py bukkit/target/CrateReloaded-2.4.0-mc121.jar 21
+```
+
+The 1.21 test suite needs the newest 1.21 API at test time:
+`mvn -Pmc121 verify -Dpaper.api.version=1.21.11-R0.1-SNAPSHOT -Deffectlib.paper.api.version=1.21.11-R0.1-SNAPSHOT`.
+CI runs the lint, all three test suites and all three builds on every push and pull request.
 
 ### Code style
 
 [Spotless](https://github.com/diffplug/spotless) with Palantir Java Format:
 
 ```bash
-make lint       # check
-make lint-fix   # apply
+mvn -pl bukkit,common,nms spotless:check   # check (what CI runs)
+mvn -pl bukkit,common,nms spotless:apply   # fix
 ```
 
 ---

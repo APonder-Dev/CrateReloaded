@@ -27,9 +27,7 @@ public final class PotionCompat {
         try {
             return MethodHandles.publicLookup()
                     .findVirtual(
-                            PotionMeta.class,
-                            "setBasePotionType",
-                            MethodType.methodType(void.class, PotionType.class));
+                            PotionMeta.class, "setBasePotionType", MethodType.methodType(void.class, PotionType.class));
         } catch (NoSuchMethodException | IllegalAccessException e) {
             return null;
         }

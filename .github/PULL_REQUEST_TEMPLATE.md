@@ -65,7 +65,7 @@
 ### Code Quality
 
 - [ ] My code follows the project's code style (Palantir Java Format)
-- [ ] I have run `make lint` and fixed any issues
+- [ ] I have run `mvn -pl bukkit,common,nms spotless:check` and fixed any issues
 - [ ] I have performed a self-review of my code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] My changes generate no new warnings

@@ -1,10 +1,5 @@
 package com.hazebyte.crate.cratereloaded;
 
-import com.hazebyte.crate.cratereloaded.compat.BuildFamily;
-import com.hazebyte.crate.cratereloaded.util.format.CustomFormat;
-import com.hazebyte.crate.api.event.ClaimGiveEvent;
-import com.hazebyte.crate.cratereloaded.claim.CrateClaim;
-import com.hazebyte.crate.cratereloaded.crate.OpeningLedger;
 import co.aikar.commands.BukkitCommandManager;
 import com.hazebyte.crate.api.CrateAPI;
 import com.hazebyte.crate.api.CratePlugin;
@@ -12,13 +7,17 @@ import com.hazebyte.crate.api.ServerVersion;
 import com.hazebyte.crate.api.claim.ClaimRegistrar;
 import com.hazebyte.crate.api.crate.BlockCrateRegistrar;
 import com.hazebyte.crate.api.crate.CrateRegistrar;
+import com.hazebyte.crate.api.event.ClaimGiveEvent;
 import com.hazebyte.crate.api.event.PluginReadyEvent;
 import com.hazebyte.crate.api.util.Messenger;
 import com.hazebyte.crate.cratereloaded.claim.ClaimManager;
+import com.hazebyte.crate.cratereloaded.claim.CrateClaim;
 import com.hazebyte.crate.cratereloaded.cmd.CrateCommandManager;
+import com.hazebyte.crate.cratereloaded.compat.BuildFamily;
 import com.hazebyte.crate.cratereloaded.component.impl.FilePluginSettingComponentImpl;
 import com.hazebyte.crate.cratereloaded.crate.BlockCrateHandler;
 import com.hazebyte.crate.cratereloaded.crate.CrateHandler;
+import com.hazebyte.crate.cratereloaded.crate.OpeningLedger;
 import com.hazebyte.crate.cratereloaded.crate.animation.Animation;
 import com.hazebyte.crate.cratereloaded.dagger.DaggerJavaPluginComponent;
 import com.hazebyte.crate.cratereloaded.dagger.JavaPluginComponent;
@@ -35,6 +34,7 @@ import com.hazebyte.crate.cratereloaded.provider.ProviderSelector;
 import com.hazebyte.crate.cratereloaded.provider.economy.EconomyProvider;
 import com.hazebyte.crate.cratereloaded.provider.holographic.HologramProvider;
 import com.hazebyte.crate.cratereloaded.provider.holographic.HologramWrapper;
+import com.hazebyte.crate.cratereloaded.util.format.CustomFormat;
 import com.hazebyte.crate.exception.ExceptionHandler;
 import com.hazebyte.crate.exception.items.DependencyNotEnabledException;
 import com.hazebyte.crate.exception.items.InvalidInputException;
@@ -511,8 +511,8 @@ public class CorePlugin extends JavaPlugin implements CratePlugin {
                         .build(),
                 () -> settings.isHandlingClaims(),
                 Bukkit::getPlayer,
-                (player, rewards) -> rewards.forEach(reward ->
-                        javaPluginComponent.getOpenCrateComponent().executeReward(player, reward)),
+                (player, rewards) -> rewards.forEach(
+                        reward -> javaPluginComponent.getOpenCrateComponent().executeReward(player, reward)),
                 (player, claim) -> {
                     ClaimGiveEvent event = new ClaimGiveEvent(claim);
                     Bukkit.getPluginManager().callEvent(event);
@@ -548,11 +548,13 @@ public class CorePlugin extends JavaPlugin implements CratePlugin {
             getLogger().warning(message);
         } else if (verdict == BuildFamily.Verdict.WRONG_ARTIFACT) {
             if (Boolean.getBoolean(BuildFamily.ALLOW_UNSUPPORTED_PROPERTY)) {
-                getLogger().severe(message + " Starting anyway because -D"
-                        + BuildFamily.ALLOW_UNSUPPORTED_PROPERTY + "=true is set.");
+                getLogger()
+                        .severe(message + " Starting anyway because -D" + BuildFamily.ALLOW_UNSUPPORTED_PROPERTY
+                                + "=true is set.");
             } else {
-                getLogger().severe(message + " Disabling CrateReloaded. (Override: -D"
-                        + BuildFamily.ALLOW_UNSUPPORTED_PROPERTY + "=true)");
+                getLogger()
+                        .severe(message + " Disabling CrateReloaded. (Override: -D"
+                                + BuildFamily.ALLOW_UNSUPPORTED_PROPERTY + "=true)");
                 getServer().getPluginManager().disablePlugin(this);
                 return false;
             }

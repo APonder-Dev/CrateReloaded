@@ -9,7 +9,7 @@ The "Evidence" column records what has actually been checked.
 ## Build families
 
 One repository, three jars. Each jar is compiled against the **lowest** Paper API it claims, for the Java
-release that Minecraft line requires. Build them with `build.sh` / `build.bat`, or `mvn -P<family> package`.
+release that Minecraft line requires. Build one with `mvn -P<family> package`; CI builds and tests all three.
 
 | Family | Jar | Minecraft | Java (bytecode) | Compiled against | `api-version` | Test suite runs against |
 |---|---|---|---|---|---|---|
@@ -19,8 +19,8 @@ release that Minecraft line requires. Build them with `build.sh` / `build.bat`, 
 
 Notes:
 - `mc26` compiles against build 249 because MockBukkit 4.124.0 cannot load build 261 (build 261 adds a
-  `minecraft:world_clock` registry that MockBukkit lacks). `build.sh` also compiles the main code against
-  `26.3.build.261-stable` to show it still builds against the newest 26.3.
+  `minecraft:world_clock` registry that MockBukkit lacks). The main code also compiles against
+  `26.3.build.261-stable`, the newest 26.3.
 - `scripts/check-bytecode.py` confirms that no class in a jar, shaded libraries included, needs a newer Java than the family
   targets.
 - At startup, `compat.BuildFamily` compares the server version with the jar's family. A jar from the wrong

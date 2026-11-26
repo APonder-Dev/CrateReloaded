@@ -54,7 +54,8 @@ class FormattingRegressionTest extends BukkitTest {
     void customVariables_expandInRewardDisplays() {
         RewardImpl reward = new RewardImpl("chance:(1), display:(DIRT 1 name:{server}_Prize)");
         Assertions.assertEquals(
-                "MyServer Prize", ChatColor.stripColor(reward.getDisplayItem().getItemMeta().getDisplayName()));
+                "MyServer Prize",
+                ChatColor.stripColor(reward.getDisplayItem().getItemMeta().getDisplayName()));
     }
 
     @Test
@@ -62,7 +63,8 @@ class FormattingRegressionTest extends BukkitTest {
         PlayerMock player = server.addPlayer("Alice");
         RewardImpl reward = new RewardImpl("chance:(1), item:(DIRT 1 name:{player}'s_dirt)");
         ItemStack given = reward.getItems(player).get(0);
-        Assertions.assertEquals("Alice's dirt", ChatColor.stripColor(given.getItemMeta().getDisplayName()));
+        Assertions.assertEquals(
+                "Alice's dirt", ChatColor.stripColor(given.getItemMeta().getDisplayName()));
     }
 
     @Test

@@ -5,7 +5,6 @@ import static com.hazebyte.crate.cratereloaded.util.item.ItemParser.isTippedArro
 
 import com.hazebyte.crate.api.util.ItemBuilder;
 import com.hazebyte.crate.api.util.Messenger;
-import com.hazebyte.crate.cratereloaded.CorePlugin;
 import com.hazebyte.crate.cratereloaded.util.StringUtils;
 import com.hazebyte.crate.cratereloaded.util.item.ItemUtil;
 import com.hazebyte.util.Mat;

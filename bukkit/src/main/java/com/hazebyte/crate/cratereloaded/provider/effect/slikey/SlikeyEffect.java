@@ -1,8 +1,8 @@
 package com.hazebyte.crate.cratereloaded.provider.effect.slikey;
 
+import com.hazebyte.crate.cratereloaded.CorePlugin;
 import com.hazebyte.crate.cratereloaded.provider.effect.EffectWrapper;
 import de.slikey.effectlib.Effect;
-import com.hazebyte.crate.cratereloaded.CorePlugin;
 import de.slikey.effectlib.EffectType;
 import de.slikey.effectlib.effect.SoundEffect;
 import java.util.Objects;

@@ -1,6 +1,5 @@
 package com.hazebyte.crate.cratereloaded.util.item;
 
-import com.hazebyte.crate.cratereloaded.compat.PotionCompat;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.PLUGIN_CUSTOM_MODEL_DATA_FEATURE_NAME;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.PLUGIN_NBT_FEATURE_NAME;
 
@@ -10,6 +9,7 @@ import com.hazebyte.crate.api.util.ItemHelper;
 import com.hazebyte.crate.api.util.Messenger;
 import com.hazebyte.crate.api.util.Replacer;
 import com.hazebyte.crate.cratereloaded.CorePlugin;
+import com.hazebyte.crate.cratereloaded.compat.PotionCompat;
 import com.hazebyte.crate.cratereloaded.error.ValidationException;
 import com.hazebyte.crate.cratereloaded.serialization.ItemSerialization;
 import com.hazebyte.crate.cratereloaded.util.Enchantments;

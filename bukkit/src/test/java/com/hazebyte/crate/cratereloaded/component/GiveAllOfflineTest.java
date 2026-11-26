@@ -59,7 +59,8 @@ class GiveAllOfflineTest extends BukkitTest {
                 .giveCrateToAllOnlinePlayers(server.getConsoleSender(), crate, 2, true);
 
         for (PlayerMock player : new PlayerMock[] {a, b}) {
-            Collection<Claim> claims = plugin.getClaimManager().getClaims(player).join();
+            Collection<Claim> claims =
+                    plugin.getClaimManager().getClaims(player).join();
             Assertions.assertEquals(1, claims.size(), "one claim per player");
             Assertions.assertEquals(0, crateItems(player), "nothing goes straight into the inventory");
         }

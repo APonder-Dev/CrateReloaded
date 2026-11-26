@@ -1,8 +1,8 @@
 package com.hazebyte.crate.cratereloaded.util;
 
-import com.hazebyte.crate.api.util.ItemBuilder;
 import com.hazebyte.crate.api.crate.Crate;
 import com.hazebyte.crate.api.effect.Category;
+import com.hazebyte.crate.api.util.ItemBuilder;
 import com.hazebyte.util.Mat;
 import java.util.regex.Pattern;
 import org.bukkit.inventory.ItemStack;
@@ -47,6 +47,7 @@ public class ConfigConstants {
 
     /** Undocumented key the code used to read for the preview title; still honoured if set. */
     public static final String LEGACY_CRATE_MENU_NAME_KEY = "crate.name";
+
     public static final String CRATE_CONFIRMATION_MENU_NAME_KEY = "crate.confirmation-menu";
     public static final String CRATE_CRAFT_CONTROL_KEY = "crate.craft";
     public static final String CRATE_ITEM_FRAME_CONTROL_KEY = "crate.item-frame";

@@ -103,7 +103,10 @@ public class OpenCrateComponentImpl implements OpenCrateComponent {
             plugin.getLogger()
                     .info(String.format(
                             "[debugRewards] %s <- constant=%s items=%d commands=%s",
-                            player.getName(), reward.isConstant(), reward.getItems().size(), reward.getCommands(player)));
+                            player.getName(),
+                            reward.isConstant(),
+                            reward.getItems().size(),
+                            reward.getCommands(player)));
         }
 
         /* Give items */
@@ -130,7 +133,8 @@ public class OpenCrateComponentImpl implements OpenCrateComponent {
         /* Give items */
         givePlayerItemsComponent.giveItems(
                 rewardV2.getItems().stream()
-                        .map(item -> com.hazebyte.crate.cratereloaded.util.format.ItemFormatter.format(item.clone(), player))
+                        .map(item ->
+                                com.hazebyte.crate.cratereloaded.util.format.ItemFormatter.format(item.clone(), player))
                         .collect(Collectors.toList()),
                 player); // per-player placeholders, as for legacy rewards (#586)
 

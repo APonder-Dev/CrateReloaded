@@ -24,10 +24,9 @@ Three jars, one per Minecraft line: `CrateReloaded-2.4.0-mc26.jar` (26.1–26.3,
 - The vendored EffectLib core follows the build family. Its Compatibility backends now target Java 17.
 - `-Dcratereloaded.debugRewards=true` (JVM flag) logs every reward paid out (constant flag, item count, commands),
   for support and testing.
-- `build.sh`: the mc121 test run now compiles EffectLib against the same 1.21.11 API as the plugin. With 1.21.1 it
+- The 1.21 test run now compiles EffectLib against the same 1.21.11 API as the plugin. With 1.21.1 it
   crashed on any Sound effect in tests (`Sound` became an interface in 1.21.3). The shipped jars weren't affected.
-- Added `build.sh` / `build.bat`, which build every family with the matching JDK, and `scripts/check-bytecode.py`,
-  which fails the build if any class in a jar, shaded libraries included, needs a newer Java than the family targets.
+- Added `scripts/check-bytecode.py`, which fails the build if any class in a jar, shaded libraries included, needs a newer Java than the family targets.
 
 ### Compatibility
 - Enchantment and potion-effect aliases are resolved by `minecraft:` key instead of Bukkit constants, which were

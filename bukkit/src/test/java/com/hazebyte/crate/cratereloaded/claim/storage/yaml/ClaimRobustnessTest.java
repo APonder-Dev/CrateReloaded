@@ -61,7 +61,10 @@ class ClaimRobustnessTest extends BukkitTest {
         String key = UUID.randomUUID().toString();
         config.getConfig().set(String.format(YamlClaimConstants.CONFIG_VERSION_KEY, key), "v2");
         config.getConfig().set(String.format(YamlClaimConstants.CONFIG_TIMESTAMP_KEY, key), "1711458318507");
-        config.getConfig().set(String.format(YamlClaimConstants.CONFIG_PLAYER_KEY, key), player.getUniqueId().toString());
+        config.getConfig()
+                .set(
+                        String.format(YamlClaimConstants.CONFIG_PLAYER_KEY, key),
+                        player.getUniqueId().toString());
         config.getConfig()
                 .set(
                         String.format(YamlClaimConstants.CONFIG_REWARDS_KEY, key),

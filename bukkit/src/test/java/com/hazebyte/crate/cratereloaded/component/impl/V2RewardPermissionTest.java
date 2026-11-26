@@ -43,6 +43,7 @@ class V2RewardPermissionTest {
 
     @Test
     void noPermissions_isAvailableToEveryone() {
-        Assertions.assertTrue(GenerateCratePrizeComponentImpl.isAllowed(RewardV2.builder().build(), playerWith()));
+        Assertions.assertTrue(
+                GenerateCratePrizeComponentImpl.isAllowed(RewardV2.builder().build(), playerWith()));
     }
 }

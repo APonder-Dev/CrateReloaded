@@ -27,7 +27,8 @@ class BundledCratesTest extends BukkitTest {
         Assertions.assertEquals(AnimationType.CSGO, crate("FoodKeyT3").getAnimationType());
         Assertions.assertEquals(AnimationType.CSGO_REVERSE, crate("FoodKeyT4").getAnimationType());
         Assertions.assertEquals(AnimationType.RECTANGLE, crate("FoodKeyT5").getAnimationType());
-        Assertions.assertEquals(AnimationType.RECTANGLE_REVERSE, crate("FoodKeyT6").getAnimationType());
+        Assertions.assertEquals(
+                AnimationType.RECTANGLE_REVERSE, crate("FoodKeyT6").getAnimationType());
         Assertions.assertEquals(AnimationType.HEART, crate("FoodKeyT7").getAnimationType());
         Assertions.assertEquals(EndAnimationType.RANDOM, crate("FoodKeyT8").getEndAnimationType());
     }
@@ -46,8 +47,10 @@ class BundledCratesTest extends BukkitTest {
         Set<String> seen = new HashSet<>();
         for (Crate crate : plugin.getCrateRegistrar().getCrates()) {
             ItemStack item = crate.getItem();
-            Assertions.assertTrue(seen.add(item.getItemMeta().getDisplayName()), "duplicate item: " + crate.getCrateName());
-            Assertions.assertSame(crate, plugin.getCrateRegistrar().getCrate(item), crate.getCrateName() + " item maps back");
+            Assertions.assertTrue(
+                    seen.add(item.getItemMeta().getDisplayName()), "duplicate item: " + crate.getCrateName());
+            Assertions.assertSame(
+                    crate, plugin.getCrateRegistrar().getCrate(item), crate.getCrateName() + " item maps back");
         }
         Assertions.assertEquals(11, seen.size());
     }

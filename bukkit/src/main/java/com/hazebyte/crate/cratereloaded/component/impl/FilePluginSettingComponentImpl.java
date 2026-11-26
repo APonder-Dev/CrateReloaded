@@ -22,7 +22,6 @@ import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_HOLOGR
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_HOLOGRAM_Y_MODIFIER_KEY;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_HOLOGRAM_Z_MODIFIER_KEY;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_HOTBAR_CONTROL_KEY;
-import com.hazebyte.crate.cratereloaded.util.ConfigConstants;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_ITEM_FRAME_CONTROL_KEY;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_MATCHER_LEVEL_KEY;
 import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.CRATE_MENU_INTERACTION_KEY;
@@ -56,6 +55,7 @@ import static com.hazebyte.crate.cratereloaded.util.ConfigConstants.WHITE_PANE_G
 import com.hazebyte.crate.api.util.Messenger;
 import com.hazebyte.crate.cratereloaded.component.PluginSettingComponent;
 import com.hazebyte.crate.cratereloaded.model.Config;
+import com.hazebyte.crate.cratereloaded.util.ConfigConstants;
 import com.hazebyte.crate.cratereloaded.util.item.ItemParser;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;

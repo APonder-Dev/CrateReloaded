@@ -1,5 +1,7 @@
 name: CI
-on: [push]
+on: [push, pull_request]
+
+# Every release must come from a commit where all of these jobs passed (see RELEASING.md).
 jobs:
   lint:
     name: Lint
@@ -15,44 +17,71 @@ jobs:
           cache: maven
 
       - name: Lint
-        run: make lint
+        run: mvn -B -pl bukkit,common,nms spotless:check
 
   test:
-    name: Unit and Integration Tests
+    name: Tests (${{ matrix.family }}, Java ${{ matrix.java }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - family: mc26
+            java: 25
+            args: ''
+          # MockBukkit for 1.21 needs the newest 1.21 API at test time; the shipped jar targets 1.21.1.
+          - family: mc121
+            java: 21
+            args: '-Dpaper.api.version=1.21.11-R0.1-SNAPSHOT -Deffectlib.paper.api.version=1.21.11-R0.1-SNAPSHOT'
+          # No MockBukkit 4.x exists for 1.20: compiles against 1.20.1 on Java 17 and runs the unit tests.
+          - family: mc120
+            java: 17
+            args: ''
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: 25
+          java-version: ${{ matrix.java }}
           distribution: 'temurin'
           cache: maven
       - name: Test with maven
-        run: mvn -B test --file pom.xml
+        run: mvn -B -P${{ matrix.family }} verify ${{ matrix.args }} --file pom.xml
 
   build:
     needs: [lint, test]
-    name: Build
+    name: Build (${{ matrix.family }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - family: mc26
+            java: 25
+          - family: mc121
+            java: 21
+          - family: mc120
+            java: 17
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: 25
+          java-version: ${{ matrix.java }}
           distribution: 'temurin'
           cache: maven
 
       - name: Build with maven
-        run: mvn -B package -DskipTests --file pom.xml
+        run: mvn -B -P${{ matrix.family }} package -DskipTests --file pom.xml
+
+      - name: Check bytecode level
+        run: python3 scripts/check-bytecode.py bukkit/target/CrateReloaded-*-${{ matrix.family }}.jar ${{ matrix.java }}
 
       - name: Copy build artifacts
-        run: mkdir staging && cp bukkit/target/*.jar staging
+        run: mkdir staging && cp bukkit/target/CrateReloaded-*-${{ matrix.family }}.jar staging
 
       - uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts
+          name: CrateReloaded-${{ matrix.family }}
           path: staging
-          retention-days: 3
+          retention-days: 7

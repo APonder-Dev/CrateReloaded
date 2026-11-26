@@ -31,7 +31,9 @@ public class V1ToV2 {
 
         // Only rewrite as V2 if every stored reward parsed; otherwise the unparseable ones would be lost.
         int stored = config.getConfig().getStringList(key).size();
-        int parsed = claim == null || claim.getRewards() == null ? 0 : claim.getRewards().size();
+        int parsed = claim == null || claim.getRewards() == null
+                ? 0
+                : claim.getRewards().size();
         if (parsed < stored) {
             throw new IllegalArgumentException(String.format(
                     "%d of %d rewards in V1 claim %s could not be parsed; left unchanged on disk",

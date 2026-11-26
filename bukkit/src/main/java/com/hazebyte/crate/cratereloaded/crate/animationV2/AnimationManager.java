@@ -2,25 +2,18 @@ package com.hazebyte.crate.cratereloaded.crate.animationV2;
 
 import static com.hazebyte.crate.cratereloaded.util.GeneralConstants.FIVE_MINUTES_TICKS;
 
-import com.hazebyte.crate.api.CrateAPI;
 import com.hazebyte.crate.api.crate.reward.Reward;
 import com.hazebyte.crate.api.effect.Category;
-import com.hazebyte.crate.api.event.ClaimGiveEvent;
-import com.hazebyte.crate.api.util.Messenger;
 import com.hazebyte.crate.cratereloaded.CorePlugin;
-import com.hazebyte.crate.cratereloaded.crate.OpeningLedger;
 import com.hazebyte.crate.cratereloaded.claim.ClaimExecutor;
-import com.hazebyte.crate.cratereloaded.claim.CrateClaim;
+import com.hazebyte.crate.cratereloaded.crate.OpeningLedger;
 import com.hazebyte.crate.cratereloaded.crate.animationV2.events.AnimationCloseEvent;
 import com.hazebyte.crate.cratereloaded.crate.animationV2.events.AnimationFrameChangeEvent;
-import com.hazebyte.crate.cratereloaded.util.format.CustomFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.val;
 import org.bukkit.Bukkit;
@@ -152,7 +145,8 @@ public class AnimationManager {
     }
 
     private static Reward winningReward(Animation animation) {
-        return CorePlugin.REWARD_MAPPER.toImplementation(animation.getWinningRewards().get(0));
+        return CorePlugin.REWARD_MAPPER.toImplementation(
+                animation.getWinningRewards().get(0));
     }
 
     public void onFrameChange(@NonNull AnimationFrameChangeEvent event) {

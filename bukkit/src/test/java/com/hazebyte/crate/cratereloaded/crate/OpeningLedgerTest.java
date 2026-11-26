@@ -85,7 +85,9 @@ class OpeningLedgerTest {
     void begin_persistsPrizeBeforeAnimationRuns() {
         OpeningLedger.Session session = ledger.begin(owner, prizeList);
         Assertions.assertEquals(1, stored.size());
-        Assertions.assertSame(prize, stored.get(session.getPendingClaim().getId()).getRewards().get(0));
+        Assertions.assertSame(
+                prize,
+                stored.get(session.getPendingClaim().getId()).getRewards().get(0));
         Assertions.assertTrue(ledger.isPending(session.getPendingClaim().getId()));
     }
 
@@ -130,7 +132,9 @@ class OpeningLedgerTest {
         Assertions.assertTrue(ledger.abort(playerId));
         Assertions.assertEquals(0, delivered.get());
         Assertions.assertEquals(1, stored.size());
-        Assertions.assertEquals(1, stored.values().iterator().next().getRewards().size(),
+        Assertions.assertEquals(
+                1,
+                stored.values().iterator().next().getRewards().size(),
                 "one key = one prize (previously the whole pre-generated list was claimed)");
         Assertions.assertEquals(1, notified.get());
     }
@@ -139,7 +143,9 @@ class OpeningLedgerTest {
     void alwaysRewards_arePartOfTheClaim_andReturnedOnCompletion() {
         Reward always = mock(Reward.class);
         OpeningLedger.Session session = ledger.begin(owner, prizeList, Collections.singletonList(always));
-        Assertions.assertEquals(2, stored.get(session.getPendingClaim().getId()).getRewards().size(),
+        Assertions.assertEquals(
+                2,
+                stored.get(session.getPendingClaim().getId()).getRewards().size(),
                 "prize + always reward are saved before the animation runs");
         Assertions.assertEquals(Collections.singletonList(always), ledger.extras(playerId));
         Assertions.assertTrue(ledger.complete(playerId));

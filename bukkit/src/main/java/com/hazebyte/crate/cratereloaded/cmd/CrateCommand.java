@@ -74,7 +74,8 @@ public class CrateCommand extends BaseCommand {
         bugReportLink.setHoverEvent(new HoverEvent(
                 HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to report an issue.").create()));
 
-        wikiLink.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/APonder-Dev/CrateReloaded/wiki"));
+        wikiLink.setClickEvent(
+                new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/APonder-Dev/CrateReloaded/wiki"));
         wikiLink.setHoverEvent(new HoverEvent(
                 HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to find information.").create()));
 
