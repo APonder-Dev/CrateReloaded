@@ -13,7 +13,7 @@ Three jars, one per Minecraft line: `CrateReloaded-2.4.0-mc26.jar` (26.1–26.3,
 - Removed the binary-only, unlicensed `com.hazebyte:base:0.0.1` jar and the in-project `bukkit/repo` file
   repository. Its only use (`ItemBuilder` in `ConfigConstants`) now uses the in-tree, MIT-licensed
   `com.hazebyte.crate.api.util.ItemBuilder`, which applies the same `&`-code replacement. The build is now
-  source-reproducible apart from the SNAPSHOT pins listed in `DEPENDENCY_AUDIT.md`.
+  source-reproducible apart from a few SNAPSHOT dependency pins.
 
 - Three build families from one source tree: `mc26` (Java 25, Paper 26.3, default), `mc121` (Java 21, compiled
   against 1.21.1) and `mc120` (Java 17, compiled against 1.20.1). Select one with `-P<family>`. Jars are named
@@ -143,10 +143,9 @@ Three jars, one per Minecraft line: `CrateReloaded-2.4.0-mc26.jar` (26.1–26.3,
 - The bundled `crate.yml` now has an example for every animation: CSGO_REVERSE, RECTANGLE, RECTANGLE_REVERSE and
   HEART, CSGO with the RANDOM end animation, and an animated mystery crate (`FoodBox`). Existing installs only get
   them by copying the new crates in. All of them were tested in game on 1.20.4, 1.21.11 and 26.1.2.
-- Added `FORK_COMPARISON.md`, `DEPENDENCY_AUDIT.md` and `BASELINE.md` (Milestone A audit).
-- Added `COMPATIBILITY-MATRIX.md`.
+- Added the wiki (installation, crates, rewards, item format, variables, effects, claims, compatibility, API).
 
 ### Included from the Fruit-Servers fork
 - Java 25 / Paper API 26.1.2, MockBukkit 26.x + JUnit 6, EffectLib 11.x vendored, DecentHolograms replaces
   HolographicDisplays, ProGuard removed, 26.x version parsing, player-head textures via `PlayerProfile` (#612),
-  concurrent-open guard and no key consumption on rejected opens. See `FORK_COMPARISON.md` for details.
+  concurrent-open guard and no key consumption on rejected opens.

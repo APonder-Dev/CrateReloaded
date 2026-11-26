@@ -69,14 +69,21 @@ public class YamlClaimStorage implements ClaimStorage {
     protected Config getConfig(OfflinePlayer player) {
         final String path =
                 String.format("%s%s.yml", ConfigConstants.CONFIG_CLAIM_STORE_SEARCH_INDEX, player.getUniqueId());
-        final Config config =
-                CorePlugin.getJavaPluginComponent().getConfigManagerComponent().getConfigWithName(path);
-        if (config != null) {
-            return config;
-        }
+        // Look up or create atomically: two threads must never end up with different Config objects for one file.
+        Object configManager = CorePlugin.getJavaPluginComponent().getConfigManagerComponent();
+        synchronized (configManager) {
+            final Config config = CorePlugin.getJavaPluginComponent()
+                    .getConfigManagerComponent()
+                    .getConfigWithName(path);
+            if (config != null) {
+                return config;
+            }
 
-        File file = new File(plugin.getDataFolder(), path);
-        return CorePlugin.getJavaPluginComponent().getConfigManagerComponent().addConfig(file);
+            File file = new File(plugin.getDataFolder(), path);
+            return CorePlugin.getJavaPluginComponent()
+                    .getConfigManagerComponent()
+                    .addConfig(file);
+        }
     }
 
     private Claim parse(Config config, String key, OfflinePlayer offlinePlayer) {

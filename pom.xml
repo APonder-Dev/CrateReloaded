@@ -22,7 +22,7 @@
 
   <properties>
     <!-- Build family defaults = Minecraft 26.x (profile mc26). See the mc121 / mc120 profiles below
-         and COMPATIBILITY-MATRIX.md. Each family compiles against the LOWEST Paper API it claims. -->
+         and the wiki's Compatibility page. Each family compiles against the LOWEST Paper API it claims. -->
     <crate.family>mc26</crate.family>
     <!-- Minecraft range the family claims (checked at startup by compat.BuildFamily). -->
     <crate.minecraft.min>26.1</crate.minecraft.min>

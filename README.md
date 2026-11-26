@@ -5,7 +5,7 @@
 > [Hazebyte/CrateReloaded](https://github.com/Hazebyte/CrateReloaded/issues).
 
 [![Version](https://img.shields.io/badge/version-2.4.0-green.svg)](CHANGELOG.md)
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.20%20%7C%201.21%20%7C%2026.x-orange.svg)](COMPATIBILITY-MATRIX.md)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.20%20%7C%201.21%20%7C%2026.x-orange.svg)](https://github.com/APonder-Dev/CrateReloaded/wiki/Compatibility)
 [![Java](https://img.shields.io/badge/Java-17%20%7C%2021%20%7C%2025-blue.svg)](#build-families)
 
 A crate plugin for Paper servers: key, mystery and supply crates with animated openings (CSGO, Roulette and
@@ -40,7 +40,7 @@ supported.
 | Other 1.20.x / 1.21.x / 26.x releases | Not yet tested; the jar is compiled against the lowest API of its family |
 | Spigot | Not yet tested |
 
-Details, test evidence and known gaps: [COMPATIBILITY-MATRIX.md](COMPATIBILITY-MATRIX.md).
+Details and known gaps: [Compatibility](https://github.com/APonder-Dev/CrateReloaded/wiki/Compatibility).
 
 ---
 
@@ -148,9 +148,7 @@ mvn -pl bukkit,common,nms spotless:apply   # fix
 | `cmi-stub` | Compile-time stubs for optional CMI hologram support (not shipped) |
 | `nms` | Placeholder for server-internal adapters; currently empty |
 
-Project reports: [FORK_COMPARISON.md](FORK_COMPARISON.md), [DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md),
-[BASELINE.md](BASELINE.md), [COMPATIBILITY-MATRIX.md](COMPATIBILITY-MATRIX.md). Remote debugging:
-[docs/debug.md](docs/debug.md).
+Documentation: [the wiki](https://github.com/APonder-Dev/CrateReloaded/wiki).
 
 ---
 
@@ -158,8 +156,8 @@ Project reports: [FORK_COMPARISON.md](FORK_COMPARISON.md), [DEPENDENCY_AUDIT.md]
 
 The CrateReloaded plugin repositories (Hazebyte and Fruit-Servers) contain **no licence file**. The original README
 showed a GPLv3 badge, but no licence text was ever published. The `api` module is MIT-licensed
-(© 2019 Hazebyte, see `api/LICENSE`), and the vendored EffectLib is MIT. See
-[DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md) for every dependency.
+(© 2019 Hazebyte, see `api/LICENSE`), and the vendored EffectLib is MIT (`effectlib/LICENSE`). Both licence
+texts ship inside the plugin jar.
 
 ## Credits
 

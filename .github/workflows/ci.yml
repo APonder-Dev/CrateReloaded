@@ -1,7 +1,7 @@
 name: CI
 on: [push, pull_request]
 
-# Every release must come from a commit where all of these jobs passed (see RELEASING.md).
+# Every release must come from a commit where all of these jobs passed.
 jobs:
   lint:
     name: Lint

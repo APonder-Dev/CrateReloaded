@@ -40,7 +40,9 @@ public class ConfigServiceComponentImpl implements ConfigServiceComponent {
     }
 
     @Override
-    public Config addConfig(File file) {
+    // The registry is a plain trie, read and written by the main thread and the claim storage thread. Unsynchronised,
+    // a lost insert made claim code create a second Config for the same file, and saves went to the wrong copy.
+    public synchronized Config addConfig(File file) {
         Config config = new Config(plugin, file);
         String relativePath =
                 plugin.getDataFolder().toURI().relativize(file.toURI()).toString();
@@ -50,12 +52,12 @@ public class ConfigServiceComponentImpl implements ConfigServiceComponent {
     }
 
     @Override
-    public Config getConfigWithName(String fileName) {
+    public synchronized Config getConfigWithName(String fileName) {
         return configs.searchExact(fileName);
     }
 
     @Override
-    public Collection<Config> getConfigsStartingWith(String searchIndex) {
+    public synchronized Collection<Config> getConfigsStartingWith(String searchIndex) {
         return configs.startsWith(searchIndex);
     }
 

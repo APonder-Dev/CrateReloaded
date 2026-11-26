@@ -12,8 +12,3 @@ target/
 # Mac
 .DS_Store
 dist/
-
-# Local build helpers (not published)
-build.sh
-build.bat
-Makefile
