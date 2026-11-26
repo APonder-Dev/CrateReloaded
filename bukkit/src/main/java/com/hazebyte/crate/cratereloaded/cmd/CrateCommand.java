@@ -55,7 +55,7 @@ public class CrateCommand extends BaseCommand {
     public void onVersion(CommandSender sender) {
         TextComponent versionMessage = new TextComponent(
                 "CrateReloaded Version " + plugin.getDescription().getVersion());
-        TextComponent authorMessage = new TextComponent("by Will (bart7567) and ToXiicalhebest");
+        TextComponent authorMessage = new TextComponent("by Will (bart7567), ToXiicalhebest, RebornIV and APonder");
         TextComponent supportLink = new TextComponent("[Support / Need Help]");
         TextComponent bugReportLink = new TextComponent("[Report an issue]");
         TextComponent wikiLink = new TextComponent("[Wiki]");
@@ -70,11 +70,11 @@ public class CrateCommand extends BaseCommand {
                 HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to open the support page.").create()));
 
         bugReportLink.setClickEvent(
-                new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/Hazebyte/CrateReloaded"));
+                new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/APonder-Dev/CrateReloaded/issues"));
         bugReportLink.setHoverEvent(new HoverEvent(
                 HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to report an issue.").create()));
 
-        wikiLink.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://crates.hazebyte.com/"));
+        wikiLink.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/APonder-Dev/CrateReloaded/wiki"));
         wikiLink.setHoverEvent(new HoverEvent(
                 HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to find information.").create()));
 

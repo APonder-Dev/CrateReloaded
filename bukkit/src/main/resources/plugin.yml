@@ -1,7 +1,7 @@
 name: CrateReloaded
 main: com.hazebyte.crate.cratereloaded.CorePlugin
 version: ${project.version}
-authors: [dinosaur, RebornIV]
+authors: [dinosaur, RebornIV, APonder]
 website: crate.hazebyte.com
 depend:
 softdepend: [Essentials, Vault, Holograms, Citizens, Multiverse-Core, PlaceholderAPI, CMI, DecentHolograms]
