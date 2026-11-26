@@ -1,5 +1,9 @@
 # CrateReloaded
 
+> **Upstream:** [Hazebyte/CratePlugin](https://github.com/Hazebyte/CratePlugin) (original plugin), via the
+> [Fruit-Servers/CratePlugin](https://github.com/Fruit-Servers/CratePlugin) fork. Issue history:
+> [Hazebyte/CrateReloaded](https://github.com/Hazebyte/CrateReloaded/issues).
+
 [![Version](https://img.shields.io/badge/version-2.4.0-green.svg)](CHANGELOG.md)
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.20%20%7C%201.21%20%7C%2026.x-orange.svg)](COMPATIBILITY-MATRIX.md)
 [![Java](https://img.shields.io/badge/Java-17%20%7C%2021%20%7C%2025-blue.svg)](#build-families)
