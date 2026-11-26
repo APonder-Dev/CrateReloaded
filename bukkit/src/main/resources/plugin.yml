@@ -4,5 +4,5 @@ version: ${project.version}
 authors: [dinosaur, RebornIV, APonder]
 website: crate.hazebyte.com
 depend:
-softdepend: [Essentials, Vault, Holograms, Citizens, Multiverse-Core, PlaceholderAPI, CMI, DecentHolograms]
+softdepend: [Essentials, Vault, Holograms, Citizens, Multiverse-Core, PlaceholderAPI, CMI, DecentHolograms, FancyHolograms]
 api-version: '${plugin.api.version}'

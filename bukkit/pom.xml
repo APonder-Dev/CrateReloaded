@@ -265,4 +265,95 @@
 
   </build>
 
+
+  <!-- FancyHolograms support: its API is Java 21 bytecode, so only the Java 21+ families compile it in
+       (src/fancyholograms/java). The mc120 (Java 17) build leaves it out; HologramProviderSelector skips it. -->
+  <profiles>
+    <profile>
+      <id>mc26</id>
+      <activation><activeByDefault>true</activeByDefault></activation>
+      <dependencies>
+        <dependency>
+          <groupId>de.oliver</groupId>
+          <artifactId>FancyHolograms</artifactId>
+          <version>2.10.0</version>
+          <scope>provided</scope>
+          <exclusions>
+            <exclusion>
+              <groupId>*</groupId>
+              <artifactId>*</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>3.6.0</version>
+            <executions>
+              <execution>
+                <id>add-fancyholograms-source</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>add-source</goal>
+                </goals>
+                <configuration>
+                  <sources>
+                    <source>${project.basedir}/src/fancyholograms/java</source>
+                  </sources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>mc121</id>
+      <dependencies>
+        <dependency>
+          <groupId>de.oliver</groupId>
+          <artifactId>FancyHolograms</artifactId>
+          <version>2.10.0</version>
+          <scope>provided</scope>
+          <exclusions>
+            <exclusion>
+              <groupId>*</groupId>
+              <artifactId>*</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>3.6.0</version>
+            <executions>
+              <execution>
+                <id>add-fancyholograms-source</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>add-source</goal>
+                </goals>
+                <configuration>
+                  <sources>
+                    <source>${project.basedir}/src/fancyholograms/java</source>
+                  </sources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <!-- Present so -Pmc120 switches off the activeByDefault mc26 profile here (no FancyHolograms on Java 17). -->
+    <profile>
+      <id>mc120</id>
+    </profile>
+  </profiles>
+
 </project>

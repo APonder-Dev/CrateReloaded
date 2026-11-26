@@ -29,6 +29,10 @@ Three jars, one per Minecraft line: `CrateReloaded-2.4.0-mc26.jar` (26.1–26.3,
 - Added `scripts/check-bytecode.py`, which fails the build if any class in a jar, shaded libraries included, needs a newer Java than the family targets.
 
 ### Compatibility
+- **FancyHolograms support** (`hologram-plugin: 'FancyHolograms'`) in the mc121 and mc26 jars. The FancyHolograms
+  API needs Java 21, so the mc120 jar doesn't include it. Holograms are created non-persistent, item lines show the
+  item's name, and colour codes are converted to MiniMessage. Tested in game with FancyHolograms 2.12.0 on
+  Paper 1.21.11 and 26.1.2 (FancyHolograms 2.12 itself needs a Java 25 server).
 - Enchantment and potion-effect aliases are resolved by `minecraft:` key instead of Bukkit constants, which were
   renamed in 1.20.5. The same code now works on 1.20 through 26.x.
 - New `compat.PotionCompat`: potion base types resolve by name (`SWIFTNESS` or `SPEED`, and so on), and

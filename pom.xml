@@ -73,6 +73,11 @@
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>
     </repository>
+    <repository>
+      <id>fancyinnovations-releases</id>
+      <name>FancyHolograms API</name>
+      <url>https://repo.fancyinnovations.com/releases</url>
+    </repository>
     <!-- com.mojang:authlib -->
     <repository>
       <id>minecraft-libraries</id>
@@ -245,6 +250,7 @@
               <includes>
                 <include>src/main/java/**/*.java</include>
                 <include>src/test/java/**/*.java</include>
+                <include>src/fancyholograms/java/**/*.java</include>
               </includes>
 
               <palantirJavaFormat>
