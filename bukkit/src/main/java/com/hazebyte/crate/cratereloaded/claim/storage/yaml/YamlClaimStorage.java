@@ -75,6 +75,9 @@ public class YamlClaimStorage implements ClaimStorage {
     public CompletableFuture<Void> unload(UUID playerId) {
         return CompletableFuture.runAsync(
                 () -> {
+                    if (!plugin.isEnabled()) {
+                        return; // queued before a disable: the config registry may already be a new instance's
+                    }
                     Config config = CorePlugin.getJavaPluginComponent()
                             .getConfigManagerComponent()
                             .getConfigWithName(path(playerId));
@@ -96,6 +99,9 @@ public class YamlClaimStorage implements ClaimStorage {
         return CompletableFuture.supplyAsync(
                 () -> {
                     int unloaded = 0;
+                    if (!plugin.isEnabled()) {
+                        return unloaded; // see unload(UUID)
+                    }
                     for (Config config : CorePlugin.getJavaPluginComponent()
                             .getConfigManagerComponent()
                             .getConfigsStartingWith(ConfigConstants.CONFIG_CLAIM_STORE_SEARCH_INDEX)) {

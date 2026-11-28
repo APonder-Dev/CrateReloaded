@@ -41,7 +41,7 @@ class ClaimRobustnessTest extends BukkitTest {
     void claimWithANullReward_stillPaysTheRest() {
         OpenCrateComponent open = mock(OpenCrateComponent.class);
         ClaimExecutor executor = new ClaimExecutor(plugin, open, mock(Logger.class));
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayerAndSettleClaims();
         Reward good = new RewardImpl("chance:(0), cmd:(/say hi)");
         CrateClaim claim = CrateClaim.builder()
                 .owner(player)
@@ -55,7 +55,7 @@ class ClaimRobustnessTest extends BukkitTest {
 
     @Test
     void claimWhoseRewardsNoLongerParse_isKeptOnDisk() throws Exception {
-        PlayerMock player = server.addPlayer();
+        PlayerMock player = addPlayerAndSettleClaims();
         Config config = plugin.getClaimManager() == null ? null : configFor(player);
         Assertions.assertNotNull(config);
         String key = UUID.randomUUID().toString();

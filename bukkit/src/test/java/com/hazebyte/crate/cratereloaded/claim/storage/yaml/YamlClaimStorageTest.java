@@ -27,7 +27,7 @@ public class YamlClaimStorageTest extends BukkitTest {
 
     @BeforeEach
     public void setup() {
-        mockPlayer = server.addPlayer();
+        mockPlayer = addPlayerAndSettleClaims();
         OpenCrateComponent mockOpenCrateComponent = Mockito.mock(OpenCrateComponent.class);
         Logger mockLogger = Mockito.mock(Logger.class);
         claimExecutor = new ClaimExecutor(plugin, mockOpenCrateComponent, mockLogger);
