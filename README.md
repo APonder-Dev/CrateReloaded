@@ -8,6 +8,8 @@
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.20%20%7C%201.21%20%7C%2026.x-orange.svg)](https://github.com/APonder-Dev/CrateReloaded/wiki/Compatibility)
 [![Java](https://img.shields.io/badge/Java-17%20%7C%2021%20%7C%2025-blue.svg)](#build-families)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa.svg?logo=githubsponsors)](https://github.com/sponsors/APonder-Dev)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-ffdd00.svg?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/aponder.dev)
 
 A crate plugin for Paper servers: key, mystery and supply crates with animated openings (CSGO, Roulette and
 more), weighted rewards, previews, holograms and a claim system for rewards that can't be delivered right away.
@@ -100,6 +102,12 @@ Changed command:
 - **Docs:** [the wiki](https://github.com/APonder-Dev/CrateReloaded/wiki), including [FAQ and Troubleshooting](https://github.com/APonder-Dev/CrateReloaded/wiki/FAQ-and-Troubleshooting)
 
 Everyone is welcome to help: answering questions, improving the wiki, translating messages or sending pull requests.
+
+## Supporting the project
+
+CrateReloaded is free and open source. If it helps your server, you can support its development through
+[GitHub Sponsors](https://github.com/sponsors/APonder-Dev) or [Buy Me a Coffee](https://buymeacoffee.com/aponder.dev). Every contribution helps keep it updated for new
+Minecraft versions.
 
 ## Building from source
 
