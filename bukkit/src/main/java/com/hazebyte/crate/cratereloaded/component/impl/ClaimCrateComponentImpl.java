@@ -12,9 +12,7 @@ import com.hazebyte.crate.cratereloaded.util.format.CustomFormat;
 import com.hazebyte.crate.exception.ExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import javax.inject.Inject;
 import org.bukkit.Bukkit;
@@ -57,53 +55,53 @@ public class ClaimCrateComponentImpl implements ClaimCrateComponent {
     @Override
     public void claimAllRewards(Player player) {
         ClaimRegistrar manager = plugin.getClaimRegistrar();
-        Consumer<Collection<Claim>> test = (claims) -> {
-            if (claims.size() <= 0) {
-                String messageKey = "core.claim_none";
-                Messenger.tell(player, CustomFormat.format(CrateAPI.getMessage(messageKey)));
-                return;
+        manager.getClaims(player)
+                // Read on the claim thread, redeem on the main thread (inventory and reward code is Bukkit API).
+                .thenAccept(claims -> Bukkit.getScheduler().runTask(plugin, () -> redeemAll(player, manager, claims)))
+                .exceptionally(throwable -> {
+                    exceptionHandler.handle((Exception) throwable);
+                    Messenger.tell(player, "&cFailed to load your claims. Please try again later.");
+                    return null;
+                });
+    }
+
+    /**
+     * Pays claims one by one and deletes each only once it was paid. Deleting first lost the reward whenever the
+     * payout was refused (inventory filled up part-way, or the claim belonged to an animation still running).
+     */
+    private void redeemAll(Player player, ClaimRegistrar manager, Collection<Claim> claims) {
+        if (!player.isOnline()) {
+            return;
+        }
+        List<Claim> redeemable = new ArrayList<>();
+        for (Claim claim : claims) {
+            if (plugin.getOpeningLedger() == null || !plugin.getOpeningLedger().isPending(claim.getId())) {
+                redeemable.add(claim);
             }
+        }
+        if (redeemable.isEmpty()) {
+            Messenger.tell(player, CustomFormat.format(CrateAPI.getMessage("core.claim_none")));
+            return;
+        }
 
-            int limit = Math.min(claims.size(), Math.min(settings.getClaimLimit(), PlayerUtil.getSlotsLeft(player)));
-
-            List<Claim> copy = new ArrayList<>();
-            Iterator<Claim> iterator = claims.iterator();
-
-            for (int i = 0; i < limit; i++) {
-                copy.add(iterator.next());
+        int limit = Math.min(redeemable.size(), Math.min(settings.getClaimLimit(), PlayerUtil.getSlotsLeft(player)));
+        for (int i = 0; i < limit; i++) {
+            Claim claim = redeemable.get(i);
+            if (!claim.execute()) {
+                break; // e.g. the inventory is full now; the rest stay claimable
             }
-
-            for (Claim claim : copy) {
-                try {
-                    manager.removeClaim(claim)
-                            .thenRun(() -> {
-                                Consumer<Claim> syncCall =
-                                        (item) -> Bukkit.getScheduler().runTask(plugin, () -> item.execute());
-                                syncCall.accept(claim);
-                            })
-                            .exceptionally(throwable -> {
-                                exceptionHandler.handle((Exception) throwable);
-                                plugin.getLogger()
-                                        .log(
-                                                Level.SEVERE,
-                                                String.format("Failed to remove claim for player %s", player.getName()),
-                                                throwable);
-                                return null;
-                            });
-                } catch (Exception e) {
-                    exceptionHandler.handle(e);
+            try {
+                manager.removeClaim(claim).exceptionally(throwable -> {
                     plugin.getLogger()
                             .log(
                                     Level.SEVERE,
-                                    String.format("Failed to initiate claim removal for player %s", player.getName()),
-                                    e);
-                }
+                                    String.format("Failed to remove claim for player %s", player.getName()),
+                                    throwable);
+                    return null;
+                });
+            } catch (Exception e) {
+                exceptionHandler.handle(e);
             }
-        };
-        manager.getClaims(player).thenAccept(test).exceptionally(throwable -> {
-            exceptionHandler.handle((Exception) throwable);
-            Messenger.tell(player, "&cFailed to load your claims. Please try again later.");
-            return null;
-        });
+        }
     }
 }

@@ -66,9 +66,64 @@ public class YamlClaimStorage implements ClaimStorage {
         }
     }
 
+    /**
+     * Drops the parsed claim file of one player from memory, after every queued read and write for it. Claim writes
+     * go to disk immediately, so nothing is lost: the file is read again the next time it is needed.
+     *
+     * @param playerId the player
+     */
+    public CompletableFuture<Void> unload(UUID playerId) {
+        return CompletableFuture.runAsync(
+                () -> {
+                    Config config = CorePlugin.getJavaPluginComponent()
+                            .getConfigManagerComponent()
+                            .getConfigWithName(path(playerId));
+                    if (config != null && config.isLoaded()) {
+                        config.unload();
+                    }
+                },
+                executor);
+    }
+
+    /**
+     * Drops the parsed claim files of every player not in {@code keep} (players who are online). Covers files read
+     * for offline players: offline gives, and admins viewing someone's claims.
+     *
+     * @param keep the players whose files stay in memory
+     * @return how many files were unloaded
+     */
+    public CompletableFuture<Integer> unloadAllExcept(java.util.Set<UUID> keep) {
+        return CompletableFuture.supplyAsync(
+                () -> {
+                    int unloaded = 0;
+                    for (Config config : CorePlugin.getJavaPluginComponent()
+                            .getConfigManagerComponent()
+                            .getConfigsStartingWith(ConfigConstants.CONFIG_CLAIM_STORE_SEARCH_INDEX)) {
+                        String name = config.getFile().getName();
+                        if (!config.isLoaded() || !name.endsWith(".yml")) {
+                            continue;
+                        }
+                        try {
+                            UUID owner = UUID.fromString(name.substring(0, name.length() - ".yml".length()));
+                            if (!keep.contains(owner)) {
+                                config.unload();
+                                unloaded++;
+                            }
+                        } catch (IllegalArgumentException notAClaimFile) {
+                            // not named after a player; leave it
+                        }
+                    }
+                    return unloaded;
+                },
+                executor);
+    }
+
+    private static String path(UUID playerId) {
+        return String.format("%s%s.yml", ConfigConstants.CONFIG_CLAIM_STORE_SEARCH_INDEX, playerId);
+    }
+
     protected Config getConfig(OfflinePlayer player) {
-        final String path =
-                String.format("%s%s.yml", ConfigConstants.CONFIG_CLAIM_STORE_SEARCH_INDEX, player.getUniqueId());
+        final String path = path(player.getUniqueId());
         // Look up or create atomically: two threads must never end up with different Config objects for one file.
         Object configManager = CorePlugin.getJavaPluginComponent().getConfigManagerComponent();
         synchronized (configManager) {

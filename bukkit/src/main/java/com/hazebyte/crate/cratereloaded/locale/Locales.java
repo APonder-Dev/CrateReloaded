@@ -76,6 +76,34 @@ public class Locales {
         }
     }
 
+    private java.util.Properties bundled;
+
+    /**
+     * A message from the language files inside the jar. The copies in plugins/CrateReloaded/messages are never
+     * overwritten, so after an update they lack keys added since: those showed as "Missing core.xyz" instead of
+     * text. The configured language is tried first, then English.
+     */
+    private synchronized String bundledMessage(String key) {
+        if (bundled == null) {
+            java.util.Properties english = load(FOLDER + "/core_en.properties", null);
+            String lang = this.plugin.getConfig().getString("locale", "en").toLowerCase(Locale.ROOT);
+            bundled = load(FOLDER + "/core_" + lang + ".properties", english);
+        }
+        return bundled.getProperty(key);
+    }
+
+    private java.util.Properties load(String resource, java.util.Properties defaults) {
+        java.util.Properties properties = new java.util.Properties(defaults);
+        try (java.io.InputStream in = plugin.getResource(resource)) {
+            if (in != null) {
+                properties.load(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8));
+            }
+        } catch (java.io.IOException e) {
+            plugin.getLogger().log(java.util.logging.Level.WARNING, "Failed to read bundled " + resource, e);
+        }
+        return properties;
+    }
+
     public Locale getDefaultLocale() {
         return this.localeManager.getDefaultLocale();
     }
@@ -98,6 +126,9 @@ public class Locales {
         final MessageKey msgKey = MessageKey.of(key).getMessageKey();
         String message = this.localeManager.getMessage(msgKey);
         if (message == null) {
+            message = bundledMessage(msgKey.getKey());
+        }
+        if (message == null) {
             message = String.format("Missing %s", msgKey.getKey());
         }
         return message;
@@ -106,6 +137,9 @@ public class Locales {
     public String getMessage(MessageKey key) {
         final MessageKey msgKey = key.getMessageKey();
         String message = this.localeManager.getMessage(msgKey);
+        if (message == null) {
+            message = bundledMessage(msgKey.getKey());
+        }
         if (message == null) {
             message = String.format("Missing %s", msgKey.getKey());
         }

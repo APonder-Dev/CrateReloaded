@@ -40,6 +40,11 @@ public class InventoryManagerListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPluginDisable(PluginDisableEvent event) {
+        // This fires for other plugins only (ours is unregistered by then; CorePlugin#onDisable closes our GUIs),
+        // so it must not close every crate GUI whenever some unrelated plugin is disabled.
+        if (!event.getPlugin().getName().equals("CrateReloaded")) {
+            return;
+        }
         inventoryManager.closeAllInventories();
         inventoryHistoryManager.handlePluginDisable(event);
     }

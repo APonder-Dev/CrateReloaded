@@ -16,9 +16,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.NonNull;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
 public class V2YamlClaimLineParser implements YamlClaimLineParser {
 
@@ -55,10 +53,12 @@ public class V2YamlClaimLineParser implements YamlClaimLineParser {
                 .collect(Collectors.toList());
 
         UUID claimUUID = UUID.fromString(key);
-        UUID playerUUID = UUID.fromString(uuidString);
-        Player player = Bukkit.getPlayer(playerUUID);
+        UUID.fromString(uuidString); // still validated
+        // The owner is the player whose file this is. Bukkit.getPlayer(uuid) (called from the claim thread) is null
+        // for anyone offline, so every claim of an offline player failed to parse: an admin viewing their claims
+        // saw none, and each read logged "Unable to parse claim data".
         CrateClaim claim = CrateClaim.builder()
-                .owner(player)
+                .owner(offlinePlayer)
                 .rewards(rewards)
                 .timestamp(timestamp)
                 .id(claimUUID)

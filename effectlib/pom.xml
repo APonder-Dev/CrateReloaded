@@ -15,6 +15,9 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- The jar has the same name in every build family; without this, a jar built for another family counted as
+         up to date and was reused. -->
+    <maven.jar.forceCreation>true</maven.jar.forceCreation>
     <!-- The core follows the CrateReloaded build family (same profile ids as the root POM: mc26 / mc121 /
          mc120). The Compatibility backends always target Java 17 and are selected at runtime. -->
     <maven.compiler.release>25</maven.compiler.release>
@@ -64,6 +67,10 @@
   </repositories>
 
   <build>
+    <!-- One class folder per Java release and Paper API version, so switching build family without "mvn clean"
+         never reuses classes compiled for another one (see the root POM). -->
+    <outputDirectory>${project.build.directory}/classes-r${maven.compiler.release}-${effectlib.paper.api.version}</outputDirectory>
+    <testOutputDirectory>${project.build.directory}/test-classes-r${maven.compiler.release}-${effectlib.paper.api.version}</testOutputDirectory>
     <pluginManagement>
       <plugins>
         <plugin>

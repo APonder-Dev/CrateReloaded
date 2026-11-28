@@ -292,6 +292,12 @@ public class CrateCommand extends BaseCommand {
             location = Camera.getTargetBlockLocation(player);
         }
 
+        if (location != null && plugin.getBlockCrateRegistrar().hasCrate(location, crate)) {
+            // Was reported as "Was not able to set", which reads like an error.
+            Messenger.tell(player, CustomFormat.format(CrateAPI.getMessage("core.block_already_set"), crate, player));
+            return;
+        }
+
         boolean success = plugin.getBlockCrateRegistrar().setCrate(location, crate);
         String message = CrateAPI.getMessage(success ? "core.successful_block_set" : "core.invalid_block_set");
         Messenger.tell(player, CustomFormat.format(message, crate, player));

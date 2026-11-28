@@ -65,6 +65,9 @@ public class OpenCrateComponentImpl implements OpenCrateComponent {
                                 .getAnimationFactoryComponent()
                                 .createAnimation(crateV2.getAnimationType(), crate);
                 crate.setAnimation(animation);
+                // The ending (BLANK reveal or RANDOM) is attached by setEndAnimationType, which only does so once
+                // an animation exists; the mapper set the type before there was one, so endings never played.
+                crate.setEndAnimationType(crateV2.getEndAnimationType());
             }
             if (crate.getAnimation() != null) {
                 Inventory inventory = crate.getAnimation().open(request.getPlayer(), request.getLocation());
@@ -84,6 +87,11 @@ public class OpenCrateComponentImpl implements OpenCrateComponent {
         CrateImpl crate = CorePlugin.CRATE_MAPPER.toImplementation(crateV2);
         List<Reward> rewards = plugin.getCrateRegistrar().generateCrateRewards(crate, request.getPlayer());
         Runnable runnable = () -> {
+            if (!request.getPlayer().isOnline()) {
+                // The key is already gone: a player who left in these few ticks gets the rewards as a claim.
+                plugin.getClaimRegistrar().addClaim(request.getPlayer(), rewards);
+                return;
+            }
             crate.onRewards(
                     request.getPlayer(),
                     rewards,

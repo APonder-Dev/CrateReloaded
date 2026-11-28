@@ -168,12 +168,19 @@ public class Rectangle extends BaseScroller {
         }
 
         @Override
-        public boolean shouldStop(int numberOfPrizes) {
-            if ((timeLapsed) >= totalTicks) {
-                return true;
+        protected boolean stopsAt(int timeLapsed, int iterations, int numberOfPrizes) {
+            return timeLapsed >= totalTicks; // the wheel stops on time only
+        }
+
+        @Override
+        public Reward landingReward() {
+            int stop = predictStopIterations();
+            if (stop < 0) {
+                return super.landingReward();
             }
-            this.iterations++;
-            return false;
+            // The spinner moves one step along scrollPath per update, i.e. once per iteration.
+            int start = scrollPath.indexOf(spinnerLocation);
+            return rewardAt((start + stop) % scrollPath.size());
         }
     }
 }

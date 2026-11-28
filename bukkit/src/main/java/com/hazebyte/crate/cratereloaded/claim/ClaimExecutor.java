@@ -10,6 +10,9 @@ import com.hazebyte.crate.cratereloaded.component.OpenCrateComponent;
 import com.hazebyte.crate.cratereloaded.util.PlayerUtil;
 import com.hazebyte.crate.cratereloaded.util.format.CustomFormat;
 import com.hazebyte.crate.logger.JSONLogRecord;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,6 +27,16 @@ public class ClaimExecutor implements Function<Claim, Boolean> {
     private final CorePlugin plugin;
     private final OpenCrateComponent openCrateComponent;
     private final Logger logger;
+
+    /** How long a redeemed claim id is remembered: far longer than any queued read of the claim file. */
+    private static final long REDEEMED_MEMORY_MILLIS = 10 * 60 * 1000L;
+
+    /**
+     * Claims paid out recently, by id. A claim can be on screen twice (the owner's menu and an admin's view, or
+     * two quick {@code /crate claim all} reads queued before the first delete reached disk); the second payout
+     * is refused here.
+     */
+    private final Map<UUID, Long> redeemed = new ConcurrentHashMap<>();
 
     public ClaimExecutor(
             @NonNull CorePlugin plugin, @NonNull OpenCrateComponent openCrateComponent, @NonNull Logger logger) {
@@ -108,6 +121,16 @@ public class ClaimExecutor implements Function<Claim, Boolean> {
         logger.log(record);
     }
 
+    /** @return false if the claim was already redeemed */
+    boolean markRedeemed(UUID claimId) {
+        if (claimId == null) {
+            return true;
+        }
+        long now = System.currentTimeMillis();
+        redeemed.values().removeIf(time -> now - time > REDEEMED_MEMORY_MILLIS);
+        return redeemed.putIfAbsent(claimId, now) == null;
+    }
+
     @Override
     public Boolean apply(Claim claim) {
         ClaimEvent event = new ClaimEvent(claim);
@@ -118,6 +141,11 @@ public class ClaimExecutor implements Function<Claim, Boolean> {
         }
 
         if (!isValidExecution(event)) {
+            return false;
+        }
+
+        if (!markRedeemed(claim.getId())) {
+            logger.warning(String.format("Claim %s was already redeemed; not paying it again", claim.getId()));
             return false;
         }
 

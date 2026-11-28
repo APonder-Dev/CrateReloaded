@@ -31,6 +31,24 @@ public class Config implements Storage {
         return fileConfiguration;
     }
 
+    /** @return whether the file's contents are parsed and held in memory */
+    public boolean isLoaded() {
+        return fileConfiguration != null;
+    }
+
+    /**
+     * Drops the parsed contents; the next {@link #getConfig()} reads the file again. Only safe when every change was
+     * already saved, and when no other thread is using this config.
+     */
+    public void unload() {
+        configLock.lock();
+        try {
+            fileConfiguration = null;
+        } finally {
+            configLock.unlock();
+        }
+    }
+
     public File getFile() {
         return file;
     }

@@ -18,6 +18,10 @@ public class HologramProviderSelector extends ProviderSelector<HologramProvider>
 
     public static final String NONE = "none";
 
+    /** Tried in this order when the configured hologram plugin is not available. */
+    public static final java.util.List<String> FALLBACK_ORDER =
+            java.util.Collections.unmodifiableList(java.util.Arrays.asList(DECENT_HOLOGRAM, FANCY_HOLOGRAMS, CMI));
+
     public HologramProviderSelector(JavaPlugin plugin) {
         super(plugin);
         addProvider(CMI, CMIProvider.class, true);

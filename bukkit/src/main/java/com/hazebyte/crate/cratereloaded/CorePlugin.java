@@ -275,6 +275,9 @@ public class CorePlugin extends JavaPlugin implements CratePlugin {
         if (openingLedger != null) {
             openingLedger.abortAll();
         }
+        // Close crate GUIs: their listeners and tasks are about to go, which would leave players looking at a frozen
+        // animation (or a dead menu) after /cr reload. Prizes are already settled above.
+        closeCrateGuis();
         if (claimManager != null && !claimManager.flush()) {
             getLogger().severe("Timed out writing crate claims to disk during shutdown.");
         }
@@ -326,6 +329,22 @@ public class CorePlugin extends JavaPlugin implements CratePlugin {
         javaPluginComponent = null;
         commandHandler = null;
         isReady = false;
+    }
+
+    private void closeCrateGuis() {
+        Animation.clearTracked(); // or the legacy animation reopens its inventory on close
+        for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
+            org.bukkit.inventory.InventoryView view = player.getOpenInventory();
+            org.bukkit.inventory.Inventory top = view == null ? null : view.getTopInventory();
+            if (top == null) {
+                continue;
+            }
+            boolean managed = javaPluginComponent != null
+                    && javaPluginComponent.getInventoryManager().isManaged(top);
+            if (top.getHolder() instanceof com.hazebyte.crate.cratereloaded.menu.BaseHolder || managed) {
+                player.closeInventory();
+            }
+        }
     }
 
     /**
@@ -627,14 +646,32 @@ public class CorePlugin extends JavaPlugin implements CratePlugin {
      * @throws ReflectiveOperationException If there is an error creating the provider
      */
     private void registerHolographics() throws ReflectiveOperationException {
-        // Create the hologram provider selector
-        ProviderSelector<HologramProvider> hologramProviderSelector = new HologramProviderSelector(this);
-
-        // Get the configured preference
+        ProviderSelector<HologramProvider> selector = new HologramProviderSelector(this);
         String preference = CorePlugin.getPlugin().getSettings().getHologramPluginPreference();
+        HologramProvider provider = (HologramProvider) getProvider(selector, preference);
 
-        // Get the provider based on preference
-        hologramProvider = (HologramProvider) getProvider(hologramProviderSelector, preference);
+        // An unavailable choice (e.g. 'HolographicDisplays' from an old config, or a plugin that was removed) used to
+        // mean no holograms at all. Use a supported hologram plugin that is installed instead, and say so.
+        if (provider instanceof com.hazebyte.crate.cratereloaded.provider.holographic.none.NoHologramProvider
+                && !HologramProviderSelector.NONE.equalsIgnoreCase(preference)) {
+            for (String fallback : HologramProviderSelector.FALLBACK_ORDER) {
+                if (!Bukkit.getPluginManager().isPluginEnabled(fallback)) {
+                    continue;
+                }
+                try {
+                    provider = selector.getProvider(fallback);
+                    getLogger()
+                            .warning(String.format(
+                                    "hologram-plugin '%s' is not available; using %s. Set hologram-plugin in config.yml"
+                                            + " to choose, or 'none' to turn holograms off.",
+                                    preference, fallback));
+                    break;
+                } catch (DependencyNotEnabledException | InvalidInputException ignored) {
+                    // not supported by this build (FancyHolograms needs the Java 21+ builds)
+                }
+            }
+        }
+        hologramProvider = provider;
     }
 
     /**

@@ -225,6 +225,14 @@ public class OpeningLedger {
         return session == null ? Collections.emptyList() : session.extras;
     }
 
+    /**
+     * @param playerId the player
+     * @return the player's open session, if an animation is in progress
+     */
+    public java.util.Optional<Session> session(UUID playerId) {
+        return java.util.Optional.ofNullable(sessions.get(playerId));
+    }
+
     /** @return whether the player has an animation in progress */
     public boolean hasSession(UUID playerId) {
         return sessions.containsKey(playerId);

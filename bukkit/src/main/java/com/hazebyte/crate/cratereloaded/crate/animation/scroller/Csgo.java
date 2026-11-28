@@ -90,6 +90,12 @@ public class Csgo extends BaseScroller {
         }
 
         @Override
+        public Reward landingReward() {
+            int stop = predictStopIterations();
+            return stop < 0 ? super.landingReward() : rewardAt(stop - 3); // what run() passes to onEnd
+        }
+
+        @Override
         public void update(Player player, Inventory inventory, List<Reward> rewards) {
             task(this).runTaskLater(CorePlugin.getPlugin(), speed);
             crate.runEffect(location, Category.ANIMATION, player);

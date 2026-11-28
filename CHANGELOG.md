@@ -2,6 +2,52 @@
 
 All notable changes to CrateReloaded are documented here. Versions continue the existing release line.
 
+## [Unreleased]
+
+### Fixed
+- Animated crates: the prize saved when an opening starts (paid if the player leaves, is kicked or the server stops)
+  is now the reward the animation lands on. It used to be a separate roll, so a player who saw a poor result coming,
+  or already landed, could disconnect before delivery and get a different reward instead.
+- `end-animation` (`BLANK` reveal or `RANDOM`) was ignored for every crate: the ending was only attached when an
+  animation already existed, which was never the case on the open path. Endings now play again.
+- `/crate claim all` deleted each claim before paying it. A claim whose payout was refused (inventory full part-way,
+  a plugin cancelling `ClaimEvent`, or a claim of an animation still running) was lost. Claims are now paid first and
+  deleted only once paid, and the pending claim of a running animation is skipped.
+- A claim can no longer be paid twice when it is on screen twice (owner and admin viewing the same claims, or two
+  quick `/crate claim all`).
+- Instant (no-animation) crates: a player who disconnects in the few ticks before delivery now gets the rewards as a
+  claim instead of losing them.
+- `/crate reload` and plugin disable close open crate GUIs, so no player is left in a frozen animation or dead menu.
+  Disabling an unrelated plugin no longer closes everyone's crate GUIs.
+- If `hologram-plugin` names a plugin that is not available (e.g. `HolographicDisplays` from an older config),
+  CrateReloaded uses an installed supported one (DecentHolograms, FancyHolograms, CMI) and logs a warning, instead
+  of showing no holograms. `none` still turns holograms off.
+- Claims of offline players could not be read: the owner was looked up among online players only, so every read
+  failed with "Unable to parse claim data" (a plugin viewing an offline player's claims saw none). The data on disk
+  was not affected.
+- `/crate set` on a block that already has that crate says so, instead of "Was not able to set". New message key
+  `core.block_already_set`, in every bundled language.
+- Message keys missing from a server's own `messages/core_<locale>.properties` (which updates never overwrite) use
+  the text bundled in the jar for that language, then English, instead of showing `Missing core.<key>`.
+- The claims menu is built on the main thread (it formats items and placeholders). The V2 animation cleanup task
+  runs on the main thread. The interaction cooldown map is pruned of expired entries instead of being cleared
+  every five minutes, which lifted every active cooldown at once.
+
+### Performance
+- Claim files no longer stay parsed in memory for the whole uptime once read. A player's file is dropped when they
+  leave, and files read for offline players (offline gives, viewing someone's claims) are dropped every five
+  minutes. Writes already go to disk immediately, so the file is simply read again when next needed.
+- Animations no longer resend the player's whole inventory window every frame; only the changed slots are sent.
+
+### Licence
+- Added the GPLv3 licence text (`LICENSE`), which the original README advertised but never included. It also ships
+  in the jar as `LICENSE`. The `api` module and the bundled EffectLib stay MIT.
+
+### Build
+- Each build family and Paper API version compiles into its own folders under `target/`, and jars are always
+  rebuilt. Switching `-P<family>` without `mvn clean` used to reuse classes compiled for the previous family (for
+  example a Java 17 EffectLib in an mc26 build), which failed only at run time.
+
 ## [2.4.0] — 2026-11-26
 
 Three jars, one per Minecraft line: `CrateReloaded-2.4.0-mc26.jar` (26.1–26.3, Java 25),

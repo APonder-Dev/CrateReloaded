@@ -38,6 +38,29 @@ public class ClaimManager implements ClaimRegistrar, OpeningLedger.PendingClaimS
         this.claimStorage = new YamlClaimStorage(plugin, claimExecutor);
         this.claimExecutor = claimExecutor;
         this.settings = settings;
+
+        // Claim files used to stay parsed in memory for the whole uptime once read. Drop a player's file when they
+        // leave, and sweep files read for offline players (offline gives, admins viewing claims) every five minutes.
+        plugin.getServer().getPluginManager().registerEvents(new UnloadOnQuit(), plugin);
+        plugin.getServer()
+                .getScheduler()
+                .runTaskTimer(plugin, this::unloadOfflineClaimFiles, UNLOAD_PERIOD, UNLOAD_PERIOD);
+    }
+
+    private static final long UNLOAD_PERIOD = 20L * 60 * 5;
+
+    private final class UnloadOnQuit implements org.bukkit.event.Listener {
+        @org.bukkit.event.EventHandler(priority = org.bukkit.event.EventPriority.MONITOR)
+        public void onQuit(org.bukkit.event.player.PlayerQuitEvent event) {
+            claimStorage.unload(event.getPlayer().getUniqueId());
+        }
+    }
+
+    /** Main thread: takes the online players, then unloads everyone else's claim file on the claim thread. */
+    public CompletableFuture<Integer> unloadOfflineClaimFiles() {
+        java.util.Set<UUID> online =
+                Bukkit.getOnlinePlayers().stream().map(Player::getUniqueId).collect(Collectors.toSet());
+        return claimStorage.unloadAllExcept(online);
     }
 
     public CompletableFuture<Claim> addClaim(@NonNull Claim claim) {
@@ -127,8 +150,13 @@ public class ClaimManager implements ClaimRegistrar, OpeningLedger.PendingClaimS
                     int totalSlots = buttonsEnabled ? displaySlots + 9 : displaySlots;
 
                     Size size = Size.fit(totalSlots);
-                    ClaimPage page = new ClaimPage(claims, size, settings);
-                    Bukkit.getScheduler().runTask(plugin, () -> page.open(viewer));
+                    // Build the page on the main thread: its buttons format items and placeholders (Bukkit API,
+                    // PlaceholderAPI), which is not safe from the claim storage thread.
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        if (viewer.isOnline()) {
+                            new ClaimPage(claims, size, settings).open(viewer);
+                        }
+                    });
                 })
                 .exceptionally(throwable -> {
                     plugin.getLogger().severe("Failed to spoof claim inventory: " + throwable.getMessage());

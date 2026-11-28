@@ -21,6 +21,8 @@
   </modules>
 
   <properties>
+    <!-- Always rebuild jars, so one built for another build family is never reused (see <build> below). -->
+    <maven.jar.forceCreation>true</maven.jar.forceCreation>
     <!-- Build family defaults = Minecraft 26.x (profile mc26). See the mc121 / mc120 profiles below
          and the wiki's Compatibility page. Each family compiles against the LOWEST Paper API it claims. -->
     <crate.family>mc26</crate.family>
@@ -165,6 +167,11 @@
   </dependencies>
 
   <build>
+    <!-- One class folder per build family and Paper API version. With a single shared folder, switching
+         -P<family> (or the API version) without "mvn clean" kept classes compiled for the previous one: the
+         compiler saw no source change. -->
+    <outputDirectory>${project.build.directory}/classes-${crate.family}-${paper.api.version}</outputDirectory>
+    <testOutputDirectory>${project.build.directory}/test-classes-${crate.family}-${paper.api.version}</testOutputDirectory>
     <pluginManagement>
       <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>

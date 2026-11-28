@@ -50,7 +50,14 @@ public class SimpleRateLimitServiceComponentImpl implements RateLimitServiceComp
     }
 
     private void startTaskTimerToClearMap() {
-        plugin.getServer().getScheduler().runTaskTimer(plugin, () -> requestIdToTime.clear(), taskDelay, taskPeriod);
+        // Drop only expired entries: clearing the whole map lifted every active cooldown at once.
+        plugin.getServer().getScheduler().runTaskTimer(plugin, this::pruneExpired, taskDelay, taskPeriod);
+    }
+
+    void pruneExpired() {
+        long now = System.currentTimeMillis();
+        long delay = getRequestDelay();
+        requestIdToTime.values().removeIf(last -> last + delay <= now);
     }
 
     private long getRequestDelay() {

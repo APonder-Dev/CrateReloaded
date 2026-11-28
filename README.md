@@ -7,6 +7,7 @@
 [![Version](https://img.shields.io/badge/version-2.4.0-green.svg)](CHANGELOG.md)
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.20%20%7C%201.21%20%7C%2026.x-orange.svg)](https://github.com/APonder-Dev/CrateReloaded/wiki/Compatibility)
 [![Java](https://img.shields.io/badge/Java-17%20%7C%2021%20%7C%2025-blue.svg)](#build-families)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 A crate plugin for Paper servers: key, mystery and supply crates with animated openings (CSGO, Roulette and
 more), weighted rewards, previews, holograms and a claim system for rewards that can't be delivered right away.
@@ -110,10 +111,13 @@ Changed command:
 ### Build a jar
 
 ```bash
-mvn clean verify                # mc26 (JDK 25), with tests
-mvn clean package -Pmc121       # 1.21 jar (JDK 21)
-mvn clean package -Pmc120       # 1.20 jar (JDK 17)
+mvn verify                # mc26 (JDK 25), with tests
+mvn package -Pmc121       # 1.21 jar (JDK 21)
+mvn package -Pmc120       # 1.20 jar (JDK 17)
 ```
+
+Each family (and Paper API version) compiles into its own folders under `target/`, so switching `-P` without
+`clean` never reuses classes built for another family.
 
 The jar is written to `bukkit/target/CrateReloaded-<version>-<family>.jar`. To confirm it loads on the family's
 Java version (bundled libraries included), run:
@@ -154,13 +158,14 @@ Documentation: [the wiki](https://github.com/APonder-Dev/CrateReloaded/wiki).
 
 ## Licence
 
-The CrateReloaded plugin repositories (Hazebyte and Fruit-Servers) contain **no licence file**. The original README
-showed a GPLv3 badge, but no licence text was ever published. The `api` module is MIT-licensed
-(© 2019 Hazebyte, see `api/LICENSE`), and the vendored EffectLib is MIT (`effectlib/LICENSE`). Both licence
-texts ship inside the plugin jar.
+CrateReloaded is licensed under the **GNU General Public License v3.0**; see [`LICENSE`](LICENSE). The original
+Hazebyte README advertised GPLv3 but never included the licence text; this fork adds it.
+
+Bundled components keep their own licences: the `api` module is MIT (© 2019 Hazebyte, `api/LICENSE`) and the
+vendored EffectLib is MIT (`effectlib/LICENSE`). The GPL and both MIT texts ship inside the plugin jar.
 
 ## Credits
 
 Original plugin by [Hazebyte](https://github.com/Hazebyte). Paper 26.x modernization by RebornIV
 ([Fruit-Servers](https://github.com/Fruit-Servers/CratePlugin)). Multi-version builds, fixes and test tooling in
-this fork by Anthony Ponder / APonder.dev.
+this fork by Anthony Ponder.

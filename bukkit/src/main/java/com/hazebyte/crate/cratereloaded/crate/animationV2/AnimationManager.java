@@ -38,7 +38,7 @@ public class AnimationManager {
         plugin.getServer().getPluginManager().registerEvents(new AnimationListener(this), plugin);
         plugin.getServer()
                 .getScheduler()
-                .runTaskTimerAsynchronously(
+                .runTaskTimer( // main thread: it calls Bukkit.getPlayer
                         plugin,
                         () -> {
                             new ArrayList<>(ongoingAnimations.keySet())
