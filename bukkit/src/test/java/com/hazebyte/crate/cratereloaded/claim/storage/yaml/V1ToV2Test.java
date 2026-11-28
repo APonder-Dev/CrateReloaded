@@ -40,6 +40,10 @@ public class V1ToV2Test extends BukkitTest {
         YamlClaimStorage storage = new YamlClaimStorage(plugin, claimExecutor);
         YamlClaimLineParser parser = new V1YamlClaimLineParser(claimExecutor);
         Config config = storage.getConfig(playerMock);
+        // Test players reuse UUIDs and share the data folder, so another test may have saved a claim for this player.
+        for (String key : config.getConfig().getKeys(false)) {
+            config.getConfig().set(key, null);
+        }
         List<String> rewardStrings = Arrays.asList("chance:(0)", "chance:(0)");
         config.getConfig().set(zeroResults, rewardStrings);
         V1ToV2 v1ToV2 = new V1ToV2(config, zeroResults, playerMock);
