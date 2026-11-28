@@ -92,6 +92,15 @@ Changed command:
 
 ---
 
+## Getting help
+
+- **Questions:** [Discussions Q&A](https://github.com/APonder-Dev/CrateReloaded/discussions/categories/q-a)
+- **Bugs:** [bug report form](https://github.com/APonder-Dev/CrateReloaded/issues/new?template=bug_report.yml)
+- **Ideas:** [Discussions Ideas](https://github.com/APonder-Dev/CrateReloaded/discussions/categories/ideas)
+- **Docs:** [the wiki](https://github.com/APonder-Dev/CrateReloaded/wiki), including [FAQ and Troubleshooting](https://github.com/APonder-Dev/CrateReloaded/wiki/FAQ-and-Troubleshooting)
+
+Everyone is welcome to help: answering questions, improving the wiki, translating messages or sending pull requests.
+
 ## Building from source
 
 ### Build families

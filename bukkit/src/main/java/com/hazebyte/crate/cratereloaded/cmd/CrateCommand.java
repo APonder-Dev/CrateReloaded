@@ -60,17 +60,18 @@ public class CrateCommand extends BaseCommand {
         TextComponent bugReportLink = new TextComponent("[Report an issue]");
         TextComponent wikiLink = new TextComponent("[Wiki]");
 
-        versionMessage.setClickEvent(
-                new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/x.3663/"));
+        versionMessage.setClickEvent(new ClickEvent(
+                ClickEvent.Action.OPEN_URL, "https://github.com/APonder-Dev/CrateReloaded/releases/latest"));
         versionMessage.setHoverEvent(new HoverEvent(
-                HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to go to the plugin page.").create()));
+                HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to open the latest release.").create()));
 
-        supportLink.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/0srgnnU1nbB8wMML"));
+        supportLink.setClickEvent(new ClickEvent(
+                ClickEvent.Action.OPEN_URL, "https://github.com/APonder-Dev/CrateReloaded/discussions/categories/q-a"));
         supportLink.setHoverEvent(new HoverEvent(
-                HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to open the support page.").create()));
+                HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to ask a question in Discussions.").create()));
 
-        bugReportLink.setClickEvent(
-                new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/APonder-Dev/CrateReloaded/issues"));
+        bugReportLink.setClickEvent(new ClickEvent(
+                ClickEvent.Action.OPEN_URL, "https://github.com/APonder-Dev/CrateReloaded/issues/new/choose"));
         bugReportLink.setHoverEvent(new HoverEvent(
                 HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to report an issue.").create()));
 

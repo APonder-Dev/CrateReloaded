@@ -33,6 +33,9 @@ All notable changes to CrateReloaded are documented here. Versions continue the 
   runs on the main thread. The interaction cooldown map is pruned of expired entries instead of being cleared
   every five minutes, which lifted every active cooldown at once.
 
+- The links in `/crate version` pointed to the original author's Discord and plugin page. They now open
+  Discussions Q&A, the bug report form and the latest release.
+
 ### Performance
 - Claim files no longer stay parsed in memory for the whole uptime once read. A player's file is dropped when they
   leave, and files read for offline players (offline gives, viewing someone's claims) are dropped every five
