@@ -1,86 +1,76 @@
-name: Feature Request
-description: Suggest a new feature or enhancement for CrateReloaded
+name: Feature request
+description: A specific, ready-to-build improvement for CrateReloaded.
 title: "[Feature] "
-labels: ["enhancement"]
+labels: ["enhancement", "needs triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for suggesting a new feature! Please provide as much detail as possible to help us understand your request.
+        Thanks for the suggestion. Early ideas and open-ended discussion fit best in [Ideas](https://github.com/APonder-Dev/CrateReloaded/discussions/categories/ideas), where others can upvote them. Use this form for a concrete feature you can describe in detail.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before you request
+      options:
+        - label: I searched [existing issues](https://github.com/APonder-Dev/CrateReloaded/issues?q=is%3Aissue) and [Ideas](https://github.com/APonder-Dev/CrateReloaded/discussions/categories/ideas) and this is not a duplicate.
+          required: true
 
   - type: textarea
     id: problem
     attributes:
-      label: Problem Description
-      description: Is your feature request related to a problem? Please describe.
-      placeholder: "I'm frustrated when... / It would be helpful if..."
+      label: Problem
+      description: What are you trying to do, and what stops you today?
+      placeholder: "I want seasonal crates that only open during an event, but there's no way to limit opening by date."
     validations:
       required: true
 
   - type: textarea
     id: solution
     attributes:
-      label: Proposed Solution
-      description: Describe the solution you'd like to see.
-      placeholder: "Add a new animation type that displays rewards in a circular pattern..."
+      label: Proposed solution
+      description: How should it work? Config examples, commands or mockups help a lot.
+      placeholder: |
+        A new crate option:
+        ```yaml
+        open-between: "2026-12-01 to 2026-12-31"
+        ```
     validations:
       required: true
 
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternative Solutions
-      description: Describe any alternative solutions or features you've considered.
-      placeholder: "Instead of a new animation, we could modify the existing ROULETTE animation to support..."
-
-  - type: textarea
-    id: use-case
-    attributes:
-      label: Use Case
-      description: Describe how this feature would be used on your server or in your plugin.
-      placeholder: |
-        We run a survival server with 200+ players and want to create seasonal crates with unique animations.
-        This feature would allow us to...
-
-  - type: textarea
-    id: additional-context
-    attributes:
-      label: Additional Context
-      description: Add any other context, screenshots, or examples about the feature request.
-      placeholder: |
-        Screenshots, mockups, or links to similar features in other plugins would be helpful!
+      label: Alternatives
+      description: Workarounds or other approaches you considered.
 
   - type: dropdown
-    id: priority
+    id: area
     attributes:
-      label: Priority
-      description: How important is this feature to you?
+      label: Area
+      multiple: true
       options:
-        - Low - Nice to have
-        - Medium - Would improve my server
-        - High - Critical for my server
+        - Opening crates / animations
+        - Rewards
+        - Keys and giving crates
+        - Claims
+        - Menus
+        - Holograms
+        - Commands and permissions
+        - Config, messages or translations
+        - Integrations
+        - Developer API
+        - Other
     validations:
       required: true
 
   - type: dropdown
     id: contribution
     attributes:
-      label: Contribution
-      description: Would you be willing to help implement this feature?
+      label: Can you help?
       options:
-        - I can implement this feature myself and submit a PR
-        - I can help test this feature
-        - I'm interested in contributing but need guidance
-        - I cannot contribute to implementation
+        - I can submit a pull request
+        - I can help test it
+        - Not this time
     validations:
       required: true
-
-  - type: checkboxes
-    id: checklist
-    attributes:
-      label: Checklist
-      options:
-        - label: I have searched existing issues and discussions to ensure this is not a duplicate
-          required: true
-        - label: This feature request is within the scope of CrateReloaded (crate/reward system)
-          required: true

@@ -78,7 +78,7 @@
 
 ### Documentation
 
-- [ ] I have updated the documentation (CLAUDE.md, wiki, JavaDocs) accordingly
+- [ ] I have updated the documentation (wiki, JavaDocs) accordingly
 - [ ] I have updated CHANGELOG.md if this is a user-facing change
 - [ ] I have added/updated code comments where necessary
 

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question
+    url: https://github.com/APonder-Dev/CrateReloaded/discussions/categories/q-a
+    about: Setup, config and permission help. Ask in Discussions Q&A.
+  - name: Share an idea
+    url: https://github.com/APonder-Dev/CrateReloaded/discussions/categories/ideas
+    about: Early feature ideas that others can discuss and upvote.
+  - name: Read the wiki
+    url: https://github.com/APonder-Dev/CrateReloaded/wiki
+    about: Installation, configuration, commands, compatibility and upgrading.

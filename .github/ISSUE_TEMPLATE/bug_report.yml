@@ -1,123 +1,160 @@
-name: Bug Report
-description: Report a bug or unexpected behavior in CrateReloaded
+name: Bug report
+description: Something in CrateReloaded is broken or behaves wrongly.
 title: "[Bug] "
-labels: ["bug"]
+labels: ["bug", "needs triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to report a bug! Please fill out the information below to help us investigate and fix the issue.
+        Thanks for reporting a bug. A clear report with steps to reproduce gets fixed fastest.
+
+        **Not a bug?** Setup and config questions go to [Q&A](https://github.com/APonder-Dev/CrateReloaded/discussions/categories/q-a), feature ideas to [Ideas](https://github.com/APonder-Dev/CrateReloaded/discussions/categories/ideas).
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before you report
+      options:
+        - label: I searched [existing issues](https://github.com/APonder-Dev/CrateReloaded/issues?q=is%3Aissue) and this is not a duplicate.
+          required: true
+        - label: I am running the [latest release](https://github.com/APonder-Dev/CrateReloaded/releases/latest) and the jar that matches my server (`mc26`, `mc121` or `mc120`).
+          required: true
 
   - type: textarea
     id: description
     attributes:
-      label: Bug Description
-      description: A clear and concise description of what the bug is.
-      placeholder: "Example: When opening a crate, the animation freezes and players don't receive rewards."
-    validations:
-      required: true
-
-  - type: textarea
-    id: steps-to-reproduce
-    attributes:
-      label: Steps to Reproduce
-      description: List the steps to reproduce the behavior.
+      label: What happened?
+      description: Describe the bug, and what you expected to happen instead.
       placeholder: |
-        1. Configure a crate with CSGO animation
-        2. Give the crate to a player
-        3. Player right-clicks to open
-        4. Animation freezes at frame 15
+        When a player opens FoodKey (CSGO animation) and the animation ends, no reward is given.
+        Expected: the player receives the reward the animation landed on.
     validations:
       required: true
 
   - type: textarea
-    id: expected-behavior
+    id: steps
     attributes:
-      label: Expected Behavior
-      description: What did you expect to happen?
-      placeholder: "The animation should complete and the player should receive their reward."
+      label: Steps to reproduce
+      description: Exact steps from a fresh start. Include the commands you ran.
+      placeholder: |
+        1. /cr set FoodKey on a chest
+        2. /cr give to Steve FoodKey 1
+        3. Steve right-clicks the chest with the key
+        4. The animation finishes, but no reward is given
     validations:
       required: true
 
-  - type: textarea
-    id: actual-behavior
+  - type: dropdown
+    id: area
     attributes:
-      label: Actual Behavior
-      description: What actually happened?
-      placeholder: "The animation freezes and the inventory becomes unresponsive."
+      label: Area
+      description: Which part of the plugin is affected? Pick all that apply.
+      multiple: true
+      options:
+        - Opening crates / animations
+        - Rewards
+        - Keys and giving crates
+        - Claims (/cr claim)
+        - Preview and other menus
+        - Holograms
+        - Commands and permissions
+        - Config, messages or translations
+        - Integrations (Vault, PlaceholderAPI, Citizens, ...)
+        - Performance / lag
+        - Startup or reload
+        - Other
     validations:
       required: true
 
-  - type: input
-    id: minecraft-version
+  - type: dropdown
+    id: frequency
     attributes:
-      label: Minecraft Version
-      description: What version of Minecraft are you running?
-      placeholder: "26.1"
-    validations:
-      required: true
-
-  - type: input
-    id: server-software
-    attributes:
-      label: Server Software
-      description: What server software are you using?
-      placeholder: "Spigot, Paper, Purpur, etc."
+      label: How often does it happen?
+      options:
+        - Every time
+        - Sometimes
+        - Happened once
     validations:
       required: true
 
   - type: input
     id: plugin-version
     attributes:
-      label: CrateReloaded Version
-      description: What version of CrateReloaded are you using?
-      placeholder: "2.4.0"
+      label: CrateReloaded version and jar
+      description: The jar file name, or the output of `/cr version`.
+      placeholder: "CrateReloaded-2.4.0-mc26.jar"
     validations:
       required: true
 
-  - type: textarea
-    id: configuration
+  - type: dropdown
+    id: server-software
     attributes:
-      label: Configuration Files
-      description: Please paste relevant sections of your config.yml and crate configuration files.
+      label: Server software
+      options:
+        - Paper
+        - Purpur
+        - Pufferfish
+        - Folia
+        - Spigot
+        - Other (say which below)
+    validations:
+      required: true
+
+  - type: input
+    id: server-version
+    attributes:
+      label: Server version
+      description: The output of `/version`.
+      placeholder: "Paper 26.1.2-55"
+    validations:
+      required: true
+
+  - type: input
+    id: java-version
+    attributes:
+      label: Java version
+      description: Shown near the top of the server log at startup.
+      placeholder: "25"
+
+  - type: dropdown
+    id: regression
+    attributes:
+      label: Did this work in an earlier version?
+      options:
+        - I don't know
+        - "No, it never worked"
+        - "Yes, it worked in an earlier version (say which below)"
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Crate and config
+      description: The crate config involved (from `plugins/CrateReloaded/crates/`) and any related `config.yml` settings. Remove anything private.
       render: yaml
       placeholder: |
-        # config.yml
-        handling-claims: true
-
-        # crate.yml
-        MyCrate:
+        FoodKey:
+          type: KEY
           animation: CSGO
+          end-animation: BLANK
 
   - type: textarea
     id: logs
     attributes:
-      label: Server Logs
+      label: Errors and logs
       description: |
-        Please paste any relevant error messages from your server logs.
-        Tip: You can attach log files by clicking this area to highlight it and then dragging files in.
+        Any errors or warnings from `logs/latest.log`, from startup to the moment of the bug. Paste the full stack trace.
+        For a long log, upload it to [mclo.gs](https://mclo.gs) and paste the link.
       render: shell
-      placeholder: |
-        [ERROR] Could not pass event...
 
   - type: textarea
-    id: other-plugins
+    id: plugins
     attributes:
-      label: Other Plugins
-      description: List other plugins you have installed that might be relevant.
-      placeholder: |
-        - Vault 1.7.3
-        - DecentHolograms 2.10.1
-        - EssentialsX 2.19.4
+      label: Other plugins
+      description: The output of `/plugins`, or at least hologram, economy, protection and inventory plugins.
+      placeholder: "DecentHolograms 2.9.2, Vault 1.7.3, EssentialsX 2.21.0, WorldGuard 7.0.13"
 
-  - type: checkboxes
-    id: checklist
+  - type: textarea
+    id: extra
     attributes:
-      label: Checklist
-      options:
-        - label: I am using the latest version of CrateReloaded
-          required: true
-        - label: I have searched existing issues to ensure this is not a duplicate
-          required: true
-        - label: I have included relevant configuration and log files
-          required: true
+      label: Anything else?
+      description: Screenshots, videos, or what you already tried. Drag files in to attach them.
